@@ -1,0 +1,482 @@
+<div class="reader-container">
+
+    <div class="reader-modebar">
+
+        <div class="mode-toggle">
+
+            <button id="classicBtn" class="mode-btn active">
+                CLASSIC UI
+            </button>
+
+            <button id="zenBtn" class="mode-btn">
+                ZEN UI
+            </button>
+
+        </div>
+
+    </div>
+
+    <div class="reader-header">
+
+        <a
+            href="/manga/<%= manga.slug %>"
+            class="back-btn"
+        >
+            ← <%= manga.title %>
+        </a>
+
+        <h2 class="reader-chapter-title">
+
+            Chương <%= chapter.chapterNumber %><% if(chapter.title){ %>: <%= chapter.title %><% } %>
+
+        </h2>
+
+    </div>
+
+    <div class="chapter-nav chapter-nav-top">
+
+        <% if(nextChapter){ %>
+
+            <a
+                href="/manga/<%= manga.slug %>/chapter/<%= nextChapter.chapterNumber %>"
+                class="nav-btn-block"
+            >
+                CHƯƠNG SAU
+            </a>
+
+        <% } else { %>
+
+            <span class="nav-btn-block disabled">
+                CHƯƠNG SAU
+            </span>
+
+        <% } %>
+
+        <% if(prevChapter){ %>
+
+            <a
+                href="/manga/<%= manga.slug %>/chapter/<%= prevChapter.chapterNumber %>"
+                class="nav-btn-block outline"
+            >
+                CHƯƠNG TRƯỚC
+            </a>
+
+        <% } else { %>
+
+            <span class="nav-btn-block outline disabled">
+                CHƯƠNG TRƯỚC
+            </span>
+
+        <% } %>
+
+    </div>
+
+    <!-- CLASSIC -->
+
+    <div id="classicReader">
+
+        <% pages.forEach(page=>{ %>
+
+        <img
+            src="<%= page %>"
+            class="reader-page"
+            loading="lazy"
+        >
+
+        <% }) %>
+
+    </div>
+
+    <!-- ZEN -->
+
+    <div id="zenReader" style="display:none;">
+
+        <div class="zen-stage">
+
+            <img id="zenPrev" class="zen-side-image" alt="">
+
+            <img
+                id="zenImage"
+                src="<%= pages[0] %>"
+                class="zen-image"
+            >
+
+            <img id="zenNext" class="zen-side-image" alt="">
+
+        </div>
+
+        <div class="zen-counter">
+
+            Trang
+            <span id="currentPage">1</span>
+            /
+            <span><%= pages.length %></span>
+
+        </div>
+
+        <div id="zenEndPanel" class="zen-end-panel" style="display:none;">
+
+            <h2>Kết thúc chương <%= chapter.chapterNumber %></h2>
+
+            <div class="chapter-nav">
+
+                <% if(nextChapter){ %>
+
+                    <a
+                        href="/manga/<%= manga.slug %>/chapter/<%= nextChapter.chapterNumber %>"
+                        class="nav-btn-block"
+                    >
+                        CHƯƠNG SAU
+                    </a>
+
+                <% } else { %>
+
+                    <span class="nav-btn-block disabled">
+                        ĐÂY LÀ CHƯƠNG MỚI NHẤT
+                    </span>
+
+                <% } %>
+
+                <% if(prevChapter){ %>
+
+                    <a
+                        href="/manga/<%= manga.slug %>/chapter/<%= prevChapter.chapterNumber %>"
+                        class="nav-btn-block outline"
+                    >
+                        CHƯƠNG TRƯỚC
+                    </a>
+
+                <% } else { %>
+
+                    <span class="nav-btn-block outline disabled">
+                        CHƯƠNG TRƯỚC
+                    </span>
+
+                <% } %>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="chapter-nav bottom-nav">
+
+        <% if(prevChapter){ %>
+
+        <a
+            href="/manga/<%= manga.slug %>/chapter/<%= prevChapter.chapterNumber %>"
+            class="nav-btn-block outline"
+        >
+            ← CHƯƠNG TRƯỚC
+        </a>
+
+        <% } %>
+
+        <% if(nextChapter){ %>
+
+        <a
+            href="/manga/<%= manga.slug %>/chapter/<%= nextChapter.chapterNumber %>"
+            class="nav-btn-block"
+        >
+            CHƯƠNG SAU →
+        </a>
+
+        <% } %>
+
+    </div>
+
+    <div class="chapter-nav end-page-nav">
+
+        <% if(nextChapter){ %>
+
+            <a
+                href="/manga/<%= manga.slug %>/chapter/<%= nextChapter.chapterNumber %>"
+                class="nav-btn-block"
+            >
+                CHƯƠNG SAU
+            </a>
+
+        <% } else { %>
+
+            <span class="nav-btn-block disabled">
+                ĐÂY LÀ CHƯƠNG MỚI NHẤT
+            </span>
+
+        <% } %>
+
+        <div class="end-page-row">
+
+            <% if(prevChapter){ %>
+
+                <a
+                    href="/manga/<%= manga.slug %>/chapter/<%= prevChapter.chapterNumber %>"
+                    class="nav-btn-block outline"
+                >
+                    CHƯƠNG TRƯỚC - <%= prevChapter.chapterNumber %>
+                </a>
+
+            <% } else { %>
+
+                <span class="nav-btn-block outline disabled">
+                    CHƯƠNG TRƯỚC
+                </span>
+
+            <% } %>
+
+            <button
+                type="button"
+                class="nav-btn-block outline"
+                onclick="window.scrollTo({top:0,behavior:'smooth'})"
+            >
+                LÊN ĐẦU
+            </button>
+
+        </div>
+
+    </div>
+
+    <div class="reader-info-text">
+
+        Bạn đang xem và đọc truyện tranh <strong><%= manga.title %></strong> tại MangaNest.
+        Chương hiện tại bạn đang đọc là chương <%= chapter.chapterNumber %><% if(chapter.title){ %> (<%= chapter.title %>)<% } %>.
+
+    </div>
+
+    <!-- Floating Nav -->
+
+    <div id="floatingNav">
+
+        <% if(prevChapter){ %>
+
+            <a
+                href="/manga/<%= manga.slug %>/chapter/<%= prevChapter.chapterNumber %>"
+                class="float-arrow"
+            >
+                ‹
+            </a>
+
+        <% } else { %>
+
+            <span class="float-arrow disabled">‹</span>
+
+        <% } %>
+
+        <select
+            onchange="location=this.value"
+            class="float-select"
+        >
+
+            <% allChapters.slice().reverse().forEach(ch=>{ %>
+
+            <option
+                value="/manga/<%= manga.slug %>/chapter/<%= ch.chapterNumber %>"
+                <%= ch.chapterNumber===chapter.chapterNumber ? 'selected' : '' %>
+            >
+                Chương <%= ch.chapterNumber %>
+            </option>
+
+            <% }) %>
+
+        </select>
+
+        <% if(nextChapter){ %>
+
+            <a
+                href="/manga/<%= manga.slug %>/chapter/<%= nextChapter.chapterNumber %>"
+                class="float-arrow"
+            >
+                ›
+            </a>
+
+        <% } else { %>
+
+            <span class="float-arrow disabled">›</span>
+
+        <% } %>
+
+        <button
+            type="button"
+            class="float-arrow"
+            onclick="window.scrollTo({top:0,behavior:'smooth'})"
+        >
+            ↑
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+
+const mangaPages = <%- JSON.stringify(pages || []) %>;
+
+let currentPage = 0;
+
+const classicBtn = document.getElementById("classicBtn");
+const zenBtn = document.getElementById("zenBtn");
+
+const classicReader = document.getElementById("classicReader");
+const zenReader = document.getElementById("zenReader");
+
+const zenImage = document.getElementById("zenImage");
+const zenPrev = document.getElementById("zenPrev");
+const zenNext = document.getElementById("zenNext");
+
+const zenEndPanel = document.getElementById("zenEndPanel");
+const currentPageText = document.getElementById("currentPage");
+
+function setImmersive(state){
+
+    document.body.classList.toggle("zen-immersive", state);
+
+}
+
+function updateZenSides(){
+
+    const prevSrc = mangaPages[currentPage - 1];
+    const nextSrc = mangaPages[currentPage + 1];
+
+    if(prevSrc){
+        zenPrev.src = prevSrc;
+        zenPrev.style.visibility = "visible";
+    }else{
+        zenPrev.style.visibility = "hidden";
+    }
+
+    if(nextSrc){
+        zenNext.src = nextSrc;
+        zenNext.style.visibility = "visible";
+    }else{
+        zenNext.style.visibility = "hidden";
+    }
+
+}
+
+function renderPage(index){
+
+    currentPage = index;
+
+    zenImage.src = mangaPages[index];
+
+    currentPageText.innerText = index + 1;
+
+    updateZenSides();
+
+}
+
+function resetZen(){
+
+    setImmersive(false);
+
+    zenEndPanel.style.display = "none";
+
+    renderPage(0);
+
+}
+
+function goNext(){
+
+    if(zenReader.style.display === "none") return;
+
+    if(currentPage + 1 >= mangaPages.length){
+
+        setImmersive(false);
+
+        zenEndPanel.style.display = "block";
+
+        return;
+
+    }
+
+    zenEndPanel.style.display = "none";
+
+    setImmersive(true);
+
+    renderPage(currentPage + 1);
+
+}
+
+function goPrev(){
+
+    if(zenReader.style.display === "none") return;
+
+    if(currentPage - 1 < 0) return;
+
+    zenEndPanel.style.display = "none";
+
+    setImmersive(true);
+
+    renderPage(currentPage - 1);
+
+}
+
+classicBtn.onclick = () => {
+
+    document.body.classList.remove("reader-zen");
+    document.body.classList.remove("zen-immersive");
+
+    classicReader.style.display = "block";
+
+    zenReader.style.display = "none";
+
+    classicBtn.classList.add("active");
+
+    zenBtn.classList.remove("active");
+
+};
+
+zenBtn.onclick = () => {
+
+    document.body.classList.add("reader-zen");
+
+    classicReader.style.display = "none";
+
+    zenReader.style.display = "flex";
+
+    zenBtn.classList.add("active");
+
+    classicBtn.classList.remove("active");
+
+    resetZen();
+
+};
+
+document.addEventListener("keydown",(e)=>{
+
+    if(zenReader.style.display === "none")
+        return;
+
+    if(e.key === "ArrowRight"){
+
+        goNext();
+
+    }
+
+    if(e.key === "ArrowLeft"){
+
+        goPrev();
+
+    }
+
+});
+
+zenImage.addEventListener("click",(e)=>{
+
+    const half = window.innerWidth / 2;
+
+    if(e.clientX > half){
+
+        goNext();
+
+    }else{
+
+        goPrev();
+
+    }
+
+});
+
+document.body.classList.add("reader-page");
+
+</script>

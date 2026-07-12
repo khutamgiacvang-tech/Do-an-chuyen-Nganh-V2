@@ -1,0 +1,62 @@
+<div class="translator-page">
+
+    <div class="translator-header">
+
+        <img
+            src="<%= translator.avatar || '/images/default-avatar.png' %>"
+            class="translator-avatar-large"
+        >
+
+        <div>
+
+            <h1>
+                <%= translator.displayName || translator.username %>
+            </h1>
+
+            <p>
+                <%= translator.description || 'Chưa có mô tả.' %>
+            </p>
+
+            <% if(translator.facebook){ %>
+
+                <a
+                    href="<%= translator.facebook %>"
+                    target="_blank"
+                    class="social-btn"
+                >
+                    Facebook
+                </a>
+
+            <% } %>
+
+        </div>
+
+    </div>
+
+    <h2>
+        Truyện đã đăng
+        (<%= mangas.length %>)
+    </h2>
+
+    <div class="translator-manga-grid">
+
+        <% mangas.forEach(manga=>{ %>
+
+            <a
+                href="/manga/<%= manga.slug %>"
+                class="translator-manga-card"
+            >
+
+                <img src="<%= manga.cover %>">
+
+                <h3>
+                    <%= manga.title %>
+                </h3>
+
+            </a>
+
+        <% }) %>
+
+    </div>
+
+</div>

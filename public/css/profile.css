@@ -1,0 +1,137 @@
+.profile-page{
+
+    width:1200px;
+
+    margin:40px auto;
+
+}
+
+.profile-card{
+
+    display:flex;
+
+    gap:50px;
+
+    background:#1d2029;
+
+    border-radius:18px;
+
+    padding:40px;
+
+    box-shadow:0 15px 35px rgba(0,0,0,.3);
+
+}
+
+.profile-left{
+
+    width:260px;
+
+    text-align:center;
+
+}
+
+.profile-avatar{
+
+    width:180px;
+
+    height:180px;
+
+    border-radius:50%;
+
+    object-fit:cover;
+
+    border:5px solid #E63946;
+
+}
+
+.profile-left h2{
+
+    margin-top:20px;
+
+    font-size:28px;
+
+}
+
+.profile-left p{
+
+    color:#999;
+
+    margin-top:8px;
+
+}
+
+.profile-right{
+
+    flex:1;
+
+}
+
+.profile-right h2{
+
+    margin-bottom:25px;
+
+}
+
+.profile-right label{
+
+    display:block;
+
+    margin-top:18px;
+
+    margin-bottom:8px;
+
+    font-weight:600;
+
+}
+
+.profile-right input,
+
+.profile-right textarea{
+
+    width:100%;
+
+    padding:12px 15px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:#2a2f3c;
+
+    color:white;
+
+}
+
+.profile-right textarea{
+
+    resize:none;
+
+    height:120px;
+
+}
+
+.profile-right button{
+
+    margin-top:30px;
+
+    padding:13px 35px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:#E63946;
+
+    color:white;
+
+    cursor:pointer;
+
+    font-size:16px;
+
+}
+
+.profile-right button:hover{
+
+    background:#ff5a66;
+
+}

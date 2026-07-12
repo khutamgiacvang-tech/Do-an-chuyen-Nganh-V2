@@ -1,0 +1,66 @@
+<div class="manga-list-page">
+
+    <h1 class="page-title">Danh sách truyện</h1>
+
+    <div class="manga-grid">
+
+        <% mangas.forEach(manga => { %>
+
+            <a href="/manga/<%= manga.slug %>" class="manga-card">
+
+                <img
+                    src="<%= manga.cover || '/images/no-cover.png' %>"
+                    alt="<%= manga.title %>"
+                >
+
+                <h3><%= manga.title %></h3>
+
+            </a>
+
+        <% }) %>
+
+    </div>
+
+    <div class="pagination">
+
+        <% if(currentPage > 1){ %>
+
+            <a
+                href="/manga?page=<%= currentPage - 1 %>"
+                class="page-btn"
+            >
+                ‹ Trang trước
+            </a>
+
+        <% } else { %>
+
+            <span class="page-btn disabled">
+                ‹ Trang trước
+            </span>
+
+        <% } %>
+
+        <span class="page-number">
+            Trang <%= currentPage %> / <%= totalPages %>
+        </span>
+
+        <% if(currentPage < totalPages){ %>
+
+            <a
+                href="/manga?page=<%= currentPage + 1 %>"
+                class="page-btn"
+            >
+                Trang sau ›
+            </a>
+
+        <% } else { %>
+
+            <span class="page-btn disabled">
+                Trang sau ›
+            </span>
+
+        <% } %>
+
+    </div>
+
+</div>

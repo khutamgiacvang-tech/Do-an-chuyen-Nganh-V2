@@ -1,0 +1,443 @@
+<%
+// Helper hiển thị thời gian tương đối kiểu "12 phút trước"
+function timeAgo(date){
+
+    if(!date) return "";
+
+    const diff = Date.now() - new Date(date).getTime();
+
+    const mins = Math.floor(diff / 60000);
+
+    if(mins < 1) return "vừa xong";
+    if(mins < 60) return mins + " phút trước";
+
+    const hours = Math.floor(mins / 60);
+    if(hours < 24) return hours + " giờ trước";
+
+    const days = Math.floor(hours / 24);
+    if(days < 30) return days + " ngày trước";
+
+    const months = Math.floor(days / 30);
+    if(months < 12) return months + " tháng trước";
+
+    return Math.floor(months / 12) + " năm trước";
+}
+%>
+
+<!-- =========================
+        HERO CAROUSEL
+========================= -->
+
+<section class="hero">
+
+    <div class="hero-track" id="heroTrack">
+
+        <% mangas.slice(0,5).forEach(manga => { %>
+
+        <a href="/manga/<%= manga.slug %>" class="hero-slide">
+
+            <img
+                src="<%= manga.banner || manga.cover %>"
+                alt="<%= manga.title %>"
+                class="hero-banner"
+            >
+
+            <div class="hero-overlay"></div>
+
+            <div class="hero-content">
+
+                <div class="hero-info">
+
+                    <h1><%= manga.title %></h1>
+
+                    <p class="hero-desc">
+                        <%= manga.description || "Chưa có mô tả." %>
+                    </p>
+
+                </div>
+
+            </div>
+
+            <span class="hero-cta">XEM THÔNG TIN</span>
+
+        </a>
+
+        <% }) %>
+
+    </div>
+
+    <div class="hero-dots" id="heroDots">
+
+        <% mangas.slice(0,5).forEach((manga, i) => { %>
+
+            <button
+                type="button"
+                class="hero-dot <%= i===0 ? 'active' : '' %>"
+                data-index="<%= i %>"
+            ></button>
+
+        <% }) %>
+
+    </div>
+
+</section>
+
+<!-- =========================
+        TRUYỆN MỚI (cuộn ngang)
+========================= -->
+
+<section class="section">
+
+    <div class="section-title">
+        <h2>TRUYỆN MỚI</h2>
+    </div>
+
+    <div class="row-wrapper">
+
+        <div class="home-row home-row-new" id="rowNew">
+            <% mangas.forEach(manga => { %>
+
+            <a href="/manga/<%= manga.slug %>" class="home-card">
+
+                <img
+                    src="<%= manga.cover || '/images/no-cover.png' %>"
+                    alt="<%= manga.title %>"
+                >
+
+                <div class="home-card-body">
+
+                    <h3><%= manga.title %></h3>
+
+                    <p>
+                        C. <%= manga.lastChapter || 0 %> - <%= timeAgo(manga.lastChapterDate) %>
+                    </p>
+
+                </div>
+
+            </a>
+
+            <% }) %>
+
+        </div>
+
+        <button
+            type="button"
+            class="row-arrow"
+            onclick="document.getElementById('rowNew').scrollBy({left:600,behavior:'smooth'})"
+        >
+            ›
+        </button>
+
+    </div>
+
+    <div class="section-footer">
+        <a href="/manga">› Xem danh sách truyện</a>
+    </div>
+
+</section>
+
+<!-- =========================
+        TRUYỆN NỔI BẬT (xếp hạng)
+========================= -->
+
+<section class="section">
+
+    <div class="section-title">
+
+        <h2>TRUYỆN NỔI BẬT</h2>
+
+        <div class="rank-tabs">
+
+            <button type="button" class="rank-tab active" data-range="week">TUẦN</button>
+            <button type="button" class="rank-tab" data-range="month">THÁNG</button>
+            <button type="button" class="rank-tab" data-range="all">MỌI LÚC</button>
+
+        </div>
+
+    </div>
+
+    <div class="row-wrapper">
+
+        <!-- TUẦN -->
+<div class="rank-row" id="weekRank">
+
+    <% topWeek.forEach((manga, i) => { %>
+
+    <a href="/manga/<%= manga.slug %>" class="rank-card">
+
+        <img
+            src="<%= manga.cover || '/images/no-cover.png' %>"
+            alt="<%= manga.title %>"
+        >
+
+        <div class="rank-body">
+
+            <h4><%= manga.title %></h4>
+
+            <p>
+                CHƯƠNG <%= manga.lastChapter || 0 %> -
+                <%= timeAgo(manga.lastChapterDate) %>
+            </p>
+
+            <small>
+                <%= (manga.weeklyViews || 0).toLocaleString("vi-VN") %>
+                LƯỢT XEM
+            </small>
+
+        </div>
+
+        <span class="rank-number">
+            <%= String(i + 1).padStart(2,"0") %>
+        </span>
+
+    </a>
+
+    <% }) %>
+
+</div>
+
+<!-- THÁNG -->
+<div
+    class="rank-row"
+    id="monthRank"
+    style="display:none"
+>
+
+    <% topMonth.forEach((manga, i) => { %>
+
+    <a href="/manga/<%= manga.slug %>" class="rank-card">
+
+        <img
+            src="<%= manga.cover || '/images/no-cover.png' %>"
+            alt="<%= manga.title %>"
+        >
+
+        <div class="rank-body">
+
+            <h4><%= manga.title %></h4>
+
+            <p>
+                CHƯƠNG <%= manga.lastChapter || 0 %> -
+                <%= timeAgo(manga.lastChapterDate) %>
+            </p>
+
+            <small>
+                <%= (manga.monthlyViews || 0).toLocaleString("vi-VN") %>
+                LƯỢT XEM
+            </small>
+
+        </div>
+
+        <span class="rank-number">
+            <%= String(i + 1).padStart(2,"0") %>
+        </span>
+
+    </a>
+
+    <% }) %>
+
+</div>
+
+<!-- MỌI LÚC -->
+<div
+    class="rank-row"
+    id="allRank"
+    style="display:none"
+>
+
+    <% topAll.forEach((manga, i) => { %>
+
+    <a href="/manga/<%= manga.slug %>" class="rank-card">
+
+        <img
+            src="<%= manga.cover || '/images/no-cover.png' %>"
+            alt="<%= manga.title %>"
+        >
+
+        <div class="rank-body">
+
+            <h4><%= manga.title %></h4>
+
+            <p>
+                CHƯƠNG <%= manga.lastChapter || 0 %> -
+                <%= timeAgo(manga.lastChapterDate) %>
+            </p>
+
+            <small>
+                <%= (manga.views || 0).toLocaleString("vi-VN") %>
+                LƯỢT XEM
+            </small>
+
+        </div>
+
+        <span class="rank-number">
+            <%= String(i + 1).padStart(2,"0") %>
+        </span>
+
+    </a>
+
+    <% }) %>
+
+</div>
+
+</section>
+
+<!-- =========================
+        THỂ LOẠI (dùng lại cho ROMCOM / BÍ ẨN & TRINH THÁM / ĐỜI THƯỜNG ...)
+        -> Khi controller truyền thêm biến (ví dụ genreSections = [{title:'ROMCOM', mangas:[...]}, ...])
+        thì chỉ cần forEach section này ra nhiều lần, đổi id row cho không trùng.
+========================= -->
+
+<section class="section">
+
+    <div class="section-title">
+        <h2>ĐỀ XUẤT CHO BẠN</h2>
+    </div>
+
+    <div class="row-wrapper">
+
+        <div class="home-row" id="rowSuggest">
+
+            <% mangas.slice().reverse().forEach(manga => { %>
+
+            <a href="/manga/<%= manga.slug %>" class="home-card">
+
+                <img
+                    src="<%= manga.cover || '/images/no-cover.png' %>"
+                    alt="<%= manga.title %>"
+                >
+
+                <div class="home-card-body">
+
+                    <h3><%= manga.title %></h3>
+
+                    <p>
+                        C. <%= manga.lastChapter || 0 %> - <%= timeAgo(manga.lastChapterDate) %>
+                    </p>
+
+                </div>
+
+            </a>
+
+            <% }) %>
+
+        </div>
+
+        <button
+            type="button"
+            class="row-arrow"
+            onclick="document.getElementById('rowSuggest').scrollBy({left:600,behavior:'smooth'})"
+        >
+            ›
+        </button>
+
+    </div>
+
+    <div class="section-footer">
+        <a href="/manga">› Xem danh sách truyện</a>
+    </div>
+
+</section>
+
+<script>
+
+/* ===== HERO CAROUSEL ===== */
+
+const heroTrack = document.getElementById("heroTrack");
+const heroDots = document.querySelectorAll(".hero-dot");
+
+heroDots.forEach(dot => {
+
+    dot.addEventListener("click", () => {
+
+        const index = Number(dot.dataset.index);
+        const slide = heroTrack.children[index];
+
+        heroTrack.scrollTo({
+            left: slide.offsetLeft,
+            behavior: "smooth"
+        });
+
+    });
+
+});
+
+function updateActiveDot(){
+
+    const scrollLeft = heroTrack.scrollLeft;
+
+    let closest = 0;
+    let closestDist = Infinity;
+
+    [...heroTrack.children].forEach((slide, i) => {
+
+        const dist = Math.abs(slide.offsetLeft - scrollLeft);
+
+        if(dist < closestDist){
+            closestDist = dist;
+            closest = i;
+        }
+
+    });
+
+    heroDots.forEach((dot, i) => {
+        dot.classList.toggle("active", i === closest);
+    });
+
+}
+
+heroTrack.addEventListener("scroll", () => {
+
+    window.requestAnimationFrame(updateActiveDot);
+
+});
+
+/* Tự động chuyển slide */
+
+let heroAutoIndex = 0;
+
+setInterval(() => {
+
+    if(!heroTrack.children.length) return;
+
+    heroAutoIndex = (heroAutoIndex + 1) % heroTrack.children.length;
+
+    heroTrack.scrollTo({
+        left: heroTrack.children[heroAutoIndex].offsetLeft,
+        behavior: "smooth"
+    });
+
+}, 6000);
+
+/* ===== RANK TABS ===== */
+
+document.querySelectorAll(".rank-tab").forEach(tab => {
+
+    tab.addEventListener("click", () => {
+
+        document.querySelectorAll(".rank-tab")
+            .forEach(t => t.classList.remove("active"));
+
+        tab.classList.add("active");
+
+        document.getElementById("weekRank").style.display = "none";
+        document.getElementById("monthRank").style.display = "none";
+        document.getElementById("allRank").style.display = "none";
+
+        if(tab.dataset.range === "week"){
+            document.getElementById("weekRank").style.display = "";
+        }
+
+        if(tab.dataset.range === "month"){
+            document.getElementById("monthRank").style.display = "";
+        }
+
+        if(tab.dataset.range === "all"){
+            document.getElementById("allRank").style.display = "";
+        }
+
+    });
+
+});
+
+</script>

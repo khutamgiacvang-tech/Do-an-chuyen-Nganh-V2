@@ -1,0 +1,219 @@
+<header class="navbar">
+
+    <div class="container">
+
+        <!-- Logo -->
+        <a href="/" class="logo">
+            📚 <span>MangaNest</span>
+        </a>
+
+        <!-- Menu -->
+        <nav class="nav-menu">
+
+            <a href="/">❤️ Ủng hộ</a>
+
+            <a href="/translator/apply">📝 Đăng truyện</a>
+
+            <a href="https://discord.gg/dREjzkdGu" target="_blank">
+                💬 Discord
+            </a>
+
+            <a href="/community">👥 Cộng đồng</a>
+
+        </nav>
+
+        <!-- Search -->
+        <div class="search-box">
+
+            <i class="fa-solid fa-magnifying-glass"></i>
+
+            <input
+                type="text"
+                placeholder="Tìm kiếm truyện...">
+
+        </div>
+
+        <!-- User -->
+        <div class="user-menu">
+
+            <% if(user){ %>
+
+            <!-- Notification -->
+
+            <div class="notification-dropdown">
+
+                <button class="notification-btn">
+
+                    <i class="fa-regular fa-bell"></i>
+
+                    <% if(unreadCount>0){ %>
+
+                    <span
+                        class="notification-badge"
+                        id="notificationBadge">
+
+                        <%= unreadCount %>
+
+                    </span>
+
+                    <% } %>
+
+                </button>
+
+                <div class="notification-menu">
+
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+
+                        <h4 style="margin:0;">
+                            🔔 Thông báo
+                        </h4>
+
+                        <% if(notifications.length>0){ %>
+
+                        <button
+                            onclick="markAllRead()"
+                            style="border:none;background:#5865F2;color:#fff;padding:6px 12px;border-radius:6px;cursor:pointer;">
+
+                            Đọc tất cả
+
+                        </button>
+
+                        <% } %>
+
+                    </div>
+
+                    <div id="notificationList">
+
+                        <% if(notifications.length>0){ %>
+
+                        <% notifications.forEach(notification=>{ %>
+
+                        <a
+                            href="<%= notification.link %>"
+                            data-id="<%= notification._id %>"
+                            class="notification-item <%= notification.isRead ? '' : 'unread' %>"
+                            onclick="readNotification(event,this)">
+
+                            <strong>
+
+                                <%= notification.title %>
+
+                            </strong>
+
+                            <br>
+
+                            <%= notification.message %>
+
+                            <small>
+
+                                <%= notification.createdAt.toLocaleString("vi-VN") %>
+
+                            </small>
+
+                        </a>
+
+                        <% }) %>
+
+                        <% }else{ %>
+
+                        <div class="empty-notification">
+
+                            Chưa có thông báo.
+
+                        </div>
+
+                        <% } %>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Avatar -->
+
+            <div class="user-dropdown">
+
+                <img
+                    class="avatar"
+                    src="<%= user.avatar ? user.avatar : '/images/default-avatar.png' %>">
+
+                <span>
+
+                    <%= user.username %>
+
+                </span>
+
+                <div class="dropdown-menu">
+
+                    <a href="/profile">
+
+                        👤 Hồ sơ
+
+                    </a>
+
+                    <% if(user && user.role === "translator"){ %>
+
+<a href="/my-manga" class="dropdown-item">
+    📚 Truyện của tôi
+</a>
+
+<% } %>
+
+                    <a href="/translator/application">
+
+                        📄 Đơn Translator
+
+                    </a>
+
+                    <a href="/library">
+
+                        ❤️ Danh sách theo dõi
+
+                    </a>
+
+                    <a href="/history">
+
+                        🕒 Lịch sử đọc
+
+                    </a>
+
+                    <% if(user.role==="admin"){ %>
+
+                    <a href="/admin">
+
+                        🛡 Quản trị
+
+                    </a>
+
+                    <% } %>
+
+                    <a href="/logout">
+
+                        🚪 Đăng xuất
+
+                    </a>
+
+                </div>
+
+            </div>
+
+            <% }else{ %>
+
+            <button
+                class="login-btn"
+                onclick="openAuth()">
+
+                <i class="fa-regular fa-user"></i>
+
+                Đăng nhập
+
+            </button>
+
+            <% } %>
+
+        </div>
+
+    </div>
+
+</header>

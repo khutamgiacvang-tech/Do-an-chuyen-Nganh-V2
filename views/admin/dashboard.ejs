@@ -1,0 +1,448 @@
+<div class="admin-page">
+
+    <h1>🛡 Quản Lý Đơn</h1>
+
+    <!-- Dashboard -->
+
+    <div class="dashboard-header">
+
+        <div class="dashboard-box pending">
+            <h2><%= pendingCount %></h2>
+            <span>Đơn chờ duyệt</span>
+        </div>
+
+        <div class="dashboard-box approved">
+            <h2><%= approvedCount %></h2>
+            <span>Đã duyệt</span>
+        </div>
+
+        <div class="dashboard-box rejected">
+            <h2><%= rejectedCount %></h2>
+            <span>Đã từ chối</span>
+        </div>
+
+    </div>
+
+    <!-- Pending -->
+
+<section class="admin-section">
+
+    <div class="section-title">
+        <h2>🟡 Chờ duyệt</h2>
+        <span><%= pendingCount %> mục</span>
+    </div>
+
+    <% if(pendingApplications.length === 0){ %>
+
+        <div class="empty-card">
+            Không có dữ liệu.
+        </div>
+
+    <% } %>
+
+    <% pendingApplications.forEach(item => { %>
+
+        <% if(item.type === "translator"){ %>
+
+            <% const application = item.data; %>
+
+            <div class="application-list-card">
+
+                <div class="application-left">
+
+                    <img
+                        src="<%= application.user.avatar || '/images/default-avatar.png' %>"
+                        class="user-avatar"
+                        onerror="this.src='/images/default-avatar.png'">
+
+                    <div>
+
+                        <h3>
+                            👤 <%= application.groupName || application.user.username %>
+                        </h3>
+
+                        <p>
+                            <%= application.user.email %>
+                        </p>
+
+                        <small>
+                            Đơn Translator •
+                            <%= application.createdAt.toLocaleDateString('vi-VN') %>
+                        </small>
+
+                    </div>
+
+                </div>
+
+                <div class="application-right">
+
+                    <span class="status pending">
+                        Translator
+                    </span>
+
+                    <button
+                        class="view-btn"
+                        onclick="openApplication('<%= application._id %>')">
+
+                        👁 Xem đơn
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        <% } else { %>
+
+            <% const manga = item.data; %>
+
+            <div class="application-list-card">
+
+                <div class="application-left">
+
+                    <img
+                        src="<%= manga.cover || '/images/default-cover.jpg' %>"
+                        class="user-avatar"
+                        onerror="this.src='/images/default-cover.jpg'">
+
+                    <div>
+
+                        <h3>
+                            📖 <%= manga.title %>
+                        </h3>
+
+                        <p>
+                            <%= manga.translator.username %>
+                        </p>
+
+                        <small>
+                            Truyện •
+                            <%= manga.createdAt.toLocaleDateString('vi-VN') %>
+                        </small>
+
+                    </div>
+
+                </div>
+
+                <div class="application-right">
+
+                    <span class="status pending">
+                        Manga
+                    </span>
+
+                    <button
+                        class="view-btn"
+                        onclick="openManga('<%= manga._id %>')">
+
+                        👁 Xem truyện
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        <% } %>
+
+    <% }) %>
+
+</section>
+
+   <!-- Approved -->
+
+<section class="admin-section">
+
+    <div class="section-title">
+
+        <h2>🟢 Đã duyệt</h2>
+
+        <span><%= approvedCount %> mục</span>
+
+    </div>
+
+    <% if(approvedApplications.length === 0){ %>
+
+        <div class="empty-card">
+            Chưa có dữ liệu.
+        </div>
+
+    <% } %>
+
+    <% approvedApplications.forEach(item => { %>
+
+        <% if(item.type === "translator"){ %>
+
+            <% const application = item.data; %>
+
+            <div class="application-list-card">
+
+                <div class="application-left">
+
+                    <img
+                        src="<%= application.user.avatar || '/images/default-avatar.png' %>"
+                        class="user-avatar"
+                        onerror="this.src='/images/default-avatar.png'">
+
+                    <div>
+
+                        <h3>
+                            👤 <%= application.groupName || application.user.username %>
+                        </h3>
+
+                        <p>
+                            <%= application.user.email %>
+                        </p>
+
+                        <small>
+                            Đơn Translator •
+                            <%= application.updatedAt.toLocaleDateString('vi-VN') %>
+                        </small>
+
+                    </div>
+
+                </div>
+
+                <div class="application-right">
+
+                    <span class="status approved">
+                        Translator
+                    </span>
+
+                    <button
+                        class="view-btn"
+                        onclick="openApplication('<%= application._id %>')">
+
+                        👁 Xem
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        <% } else { %>
+
+            <% const manga = item.data; %>
+
+            <div class="application-list-card">
+
+                <div class="application-left">
+
+                    <img
+                        src="<%= manga.cover || '/images/default-cover.jpg' %>"
+                        class="user-avatar"
+                        onerror="this.src='/images/default-cover.jpg'">
+
+                    <div>
+
+                        <h3>
+                            📖 <%= manga.title %>
+                        </h3>
+
+                        <p>
+                            <%= manga.translator.username %>
+                        </p>
+
+                        <small>
+                            Truyện •
+                            <%= manga.updatedAt.toLocaleDateString('vi-VN') %>
+                        </small>
+
+                    </div>
+
+                </div>
+
+                <div class="application-right">
+
+                    <span class="status approved">
+                        Manga
+                    </span>
+
+                    <button
+                        class="view-btn"
+                        onclick="openManga('<%= manga._id %>')">
+
+                        👁 Xem truyện
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        <% } %>
+
+    <% }) %>
+
+</section>
+
+   <!-- Rejected -->
+
+<section class="admin-section">
+
+    <div class="section-title">
+        <h2>🔴 Đã từ chối</h2>
+        <span><%= rejectedCount %> mục</span>
+    </div>
+
+    <% if(rejectedApplications.length === 0){ %>
+
+        <div class="empty-card">
+            Chưa có dữ liệu.
+        </div>
+
+    <% } %>
+
+    <% rejectedApplications.forEach(item => { %>
+
+        <% if(item.type === "translator"){ %>
+
+            <% const application = item.data; %>
+
+            <div class="application-list-card">
+
+                <div class="application-left">
+
+                    <img
+                        src="<%= application.user.avatar || '/images/default-avatar.png' %>"
+                        class="user-avatar"
+                        onerror="this.src='/images/default-avatar.png'">
+
+                    <div>
+
+                        <h3>
+                            👤 <%= application.groupName || application.user.username %>
+                        </h3>
+
+                        <p>
+                            <%= application.user.email %>
+                        </p>
+
+                        <small>
+                            Đơn Translator •
+                            <%= application.updatedAt.toLocaleDateString('vi-VN') %>
+                        </small>
+
+                    </div>
+
+                </div>
+
+                <div class="application-right">
+
+                    <span class="status rejected">
+                        Translator
+                    </span>
+
+                    <button
+                        class="view-btn"
+                        onclick="openApplication('<%= application._id %>')">
+
+                        👁 Xem đơn
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        <% } else { %>
+
+            <% const manga = item.data; %>
+
+            <div class="application-list-card">
+
+                <div class="application-left">
+
+                    <img
+                        src="<%= manga.cover || '/images/default-cover.jpg' %>"
+                        class="user-avatar"
+                        onerror="this.src='/images/default-cover.jpg'">
+
+                    <div>
+
+                        <h3>
+                            📖 <%= manga.title %>
+                        </h3>
+
+                        <p>
+                            <%= manga.translator.username %>
+                        </p>
+
+                        <small>
+                            Truyện •
+                            <%= manga.updatedAt.toLocaleDateString('vi-VN') %>
+                        </small>
+
+                    </div>
+
+                </div>
+
+                <div class="application-right">
+
+                    <span class="status rejected">
+                        Manga
+                    </span>
+
+                    <button
+                        class="view-btn"
+                        onclick="openManga('<%= manga._id %>')">
+
+                        👁 Xem truyện
+
+                    </button>
+
+                </div>
+
+            </div>
+
+        <% } %>
+
+    <% }) %>
+
+</section>
+
+</div>
+
+<!-- ================= Modal đơn ================= -->
+
+<div id="applicationModal" class="application-modal">
+
+    <div class="application-modal-content">
+
+        <span
+            class="close-modal"
+            onclick="closeApplication()">
+
+            &times;
+
+        </span>
+
+        <div id="applicationContent">
+
+            <div class="loading">
+
+                ⏳ Đang tải dữ liệu...
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- ================= Popup ảnh ================= -->
+
+<div id="imageModal" class="image-modal">
+
+    <span id="closeImage">&times;</span>
+
+    <img id="modalImage">
+
+</div>
+
+
+
+<script src="/js/admin-dashboard.js"></script>

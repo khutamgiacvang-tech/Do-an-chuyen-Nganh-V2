@@ -1,0 +1,85 @@
+<div class="profile-page">
+
+    <% if(success.length){ %>
+
+        <div class="alert success">
+
+            <%= success %>
+
+        </div>
+
+    <% } %>
+
+    <% if(error.length){ %>
+
+        <div class="alert error">
+
+            <%= error %>
+
+        </div>
+
+    <% } %>
+
+    <div class="profile-card">
+
+        <div class="profile-left">
+
+           <img
+src="<%= user.avatar || '/images/default-avatar.png' %>"
+                class="profile-avatar"
+            >
+
+            <h2><%= user.username %></h2>
+
+            <p><%= user.role.toUpperCase() %></p>
+
+        </div>
+
+        <div class="profile-right">
+
+            <h2>Thông tin cá nhân</h2>
+
+            <form
+                action="/profile/update"
+                method="POST"
+                enctype="multipart/form-data">
+
+                <label>Email</label>
+
+                <input
+                    type="email"
+                    value="<%= user.email %>"
+                    disabled>
+
+                <label>Tên người dùng</label>
+
+                <input
+                    type="text"
+                    name="username"
+                    value="<%= user.username %>">
+
+                <label>Giới thiệu</label>
+
+                <textarea
+                    name="bio"><%= user.bio %></textarea>
+
+                <label>Ảnh đại diện</label>
+
+                <input
+                    type="file"
+                    name="avatar"
+                    accept="image/*">
+
+                <button type="submit">
+
+                    💾 Lưu thay đổi
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>

@@ -1,0 +1,219 @@
+<div class="translator-page">
+
+    <h1>📚 Truyện của tôi</h1>
+
+    <div class="dashboard">
+
+        <div class="dashboard-card">
+            <h3>📚</h3>
+            <span>Tổng truyện</span>
+            <strong><%= totalManga %></strong>
+        </div>
+
+        <div class="dashboard-card">
+            <h3>📖</h3>
+            <span>Tổng Chapter</span>
+            <strong><%= totalChapter %></strong>
+        </div>
+
+        <div class="dashboard-card">
+            <h3>👀</h3>
+            <span>Lượt xem</span>
+            <strong><%= totalViews %></strong>
+        </div>
+
+        <div class="dashboard-card">
+            <h3>❤️</h3>
+            <span>Follow</span>
+            <strong><%= totalFollowers %></strong>
+        </div>
+
+    </div>
+
+
+    <!-- ===================== -->
+    <!-- Chờ duyệt -->
+    <!-- ===================== -->
+
+    <h2 style="color:#ffc107;margin:30px 0 15px;">
+        🟡 Chờ duyệt (<%= pending.length %>)
+    </h2>
+
+    <% if(pending.length===0){ %>
+
+        <div class="empty-box">
+            Không có truyện nào đang chờ duyệt.
+        </div>
+
+    <% } %>
+
+    <% pending.forEach(manga=>{ %>
+
+        <div class="my-manga-card">
+
+            <img
+                src="<%= manga.cover || '/images/no-cover.png' %>"
+                class="my-manga-cover"
+            >
+
+            <div class="my-manga-info">
+
+                <h2><%= manga.title %></h2>
+
+                <p>
+                    <strong>Chapter:</strong>
+                    <%= manga.totalChapters %>
+                </p>
+
+                <p>
+                    <strong>Tác giả:</strong>
+                    <%= manga.author %>
+                </p>
+
+                <p>
+                    <%= manga.createdAt.toLocaleDateString("vi-VN") %>
+                </p>
+
+            </div>
+
+            <div>
+
+                <a
+                    href="/my-manga/<%= manga.slug %>"
+                    class="upload-btn">
+
+                    Quản lý
+
+                </a>
+
+            </div>
+
+        </div>
+
+    <% }) %>
+
+
+    <!-- ===================== -->
+    <!-- Đã duyệt -->
+    <!-- ===================== -->
+
+    <h2 style="color:#28c76f;margin:40px 0 15px;">
+        🟢 Đã duyệt (<%= approved.length %>)
+    </h2>
+
+    <% if(approved.length===0){ %>
+
+        <div class="empty-box">
+            Chưa có truyện nào được duyệt.
+        </div>
+
+    <% } %>
+
+    <% approved.forEach(manga=>{ %>
+
+        <div class="my-manga-card">
+
+            <img
+                src="<%= manga.cover || '/images/no-cover.png' %>"
+                class="my-manga-cover"
+            >
+
+            <div class="my-manga-info">
+
+                <h2><%= manga.title %></h2>
+
+                <p>
+                    <strong>Chapter:</strong>
+                    <%= manga.totalChapters %>
+                </p>
+
+                <p>
+                    <strong>Tác giả:</strong>
+                    <%= manga.author %>
+                </p>
+
+                <p>
+                    <%= manga.createdAt.toLocaleDateString("vi-VN") %>
+                </p>
+
+            </div>
+
+            <div>
+
+                <a
+                    href="/my-manga/<%= manga.slug %>"
+                    class="upload-btn">
+
+                    Quản lý
+
+                </a>
+
+            </div>
+
+        </div>
+
+    <% }) %>
+
+
+    <!-- ===================== -->
+    <!-- Đã từ chối -->
+    <!-- ===================== -->
+
+    <h2 style="color:#ff5b5b;margin:40px 0 15px;">
+        🔴 Đã từ chối (<%= rejected.length %>)
+    </h2>
+
+    <% if(rejected.length===0){ %>
+
+        <div class="empty-box">
+            Không có truyện bị từ chối.
+        </div>
+
+    <% } %>
+
+    <% rejected.forEach(manga=>{ %>
+
+        <div class="my-manga-card">
+
+            <img
+                src="<%= manga.cover || '/images/no-cover.png' %>"
+                class="my-manga-cover"
+            >
+
+            <div class="my-manga-info">
+
+                <h2><%= manga.title %></h2>
+
+                <p>
+                    <strong>Chapter:</strong>
+                    <%= manga.totalChapters %>
+                </p>
+
+                <p>
+                    <strong>Tác giả:</strong>
+                    <%= manga.author %>
+                </p>
+
+                <p>
+                    <%= manga.createdAt.toLocaleDateString("vi-VN") %>
+                </p>
+
+            </div>
+
+            <div>
+
+                <a
+                    href="/my-manga/<%= manga.slug %>"
+                    class="upload-btn">
+
+                    Quản lý
+
+                </a>
+
+            </div>
+
+        </div>
+
+    <% }) %>
+
+</div>

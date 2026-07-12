@@ -1,0 +1,1070 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+
+    font-family:Arial, Helvetica, sans-serif;
+
+    background:#0f1115;
+
+    color:white;
+
+}
+
+a{
+
+    text-decoration:none;
+
+    color:white;
+
+}
+
+main{
+
+    width:1200px;
+    max-width:none;
+    margin:auto;
+
+}
+
+/* =========================
+   MANGA DETAIL
+========================= */
+
+.manga-page{
+    max-width:1400px;
+    margin:30px auto;
+    padding:0 20px;
+}
+
+.manga-card{
+    background:#1b2030;
+    border-radius:18px;
+    overflow:hidden;
+    border:1px solid rgba(255,255,255,.05);
+}
+
+/* Chặn triệt để mọi hiệu ứng hover nhích lên trong trang detail */
+
+.manga-card,
+.manga-card:hover,
+.manga-banner,
+.manga-banner:hover,
+.manga-banner img,
+.manga-banner img:hover,
+.manga-banner-img,
+.manga-banner-img:hover,
+.manga-cover,
+.manga-cover:hover,
+.cover-wrapper,
+.cover-wrapper:hover{
+    transform:none !important;
+    transition:none !important;
+}
+
+/* =========================
+   BANNER
+========================= */
+
+.manga-banner{
+    position:relative;
+    height:580px;
+    overflow:hidden;
+
+    background:#1b2030;
+    border-radius:18px 18px 0 0;
+}
+
+.manga-banner img,
+.manga-banner-img{
+    display:block;
+    width:100%;
+    height:100%;
+
+    object-fit:cover;
+    object-position:center 25%;
+}
+
+.manga-banner::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    z-index:1;
+
+    /* Không cần gradient tối nữa vì chữ đã nằm ở khung riêng bên dưới banner,
+       không đè lên ảnh -> giữ banner sáng rõ nguyên bản */
+
+    background:none;
+    pointer-events:none;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.manga-header{
+    position:relative;
+    z-index:5;
+
+    display:flex;
+    gap:28px;
+    align-items:flex-end;
+
+    margin-top:-290px;
+
+    padding:0 40px 35px;
+}
+
+.cover-wrapper{
+    flex-shrink:0;
+}
+
+.manga-cover{
+    width:190px;
+    height:270px;
+
+    object-fit:cover;
+
+    border-radius:12px;
+
+    box-shadow:
+    0 15px 40px rgba(0,0,0,.55);
+}
+
+.manga-info{
+    flex:1;
+    align-self:flex-end;
+    color:#fff;
+}
+
+.manga-info h1{
+    font-size:28px;
+    line-height:1.25;
+    font-weight:800;
+
+    margin-bottom:12px;
+
+    text-shadow:0 2px 8px rgba(0,0,0,.5);
+}
+
+.author-line{
+    display:flex;
+    gap:25px;
+    flex-wrap:wrap;
+
+    font-size:14px;
+    color:#d5d8e5;
+
+    margin-bottom:14px;
+}
+
+.genre-list{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+
+    margin-bottom:14px;
+}
+
+.genre-tag{
+    background:#363d50;
+    color:#fff;
+
+    padding:6px 12px;
+
+    border-radius:999px;
+
+    font-size:12px;
+}
+
+.status{
+    display:inline-block;
+
+    padding:7px 14px;
+
+    border-radius:999px;
+
+    font-size:12px;
+    font-weight:700;
+
+    margin-bottom:16px;
+}
+
+.ongoing{
+    background:#3d5afe;
+}
+
+.completed{
+    background:#28c76f;
+}
+
+.hiatus{
+    background:#ea5455;
+}
+
+.action-buttons{
+    margin-top:10px;
+
+    display:flex;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+}
+
+.follow-form{
+    display:inline-block;
+}
+
+.btn-follow-toggle{
+    display:inline-flex;
+    align-items:center;
+
+    padding:14px 24px;
+
+    border-radius:10px;
+
+    font-weight:700;
+    font-size:15px;
+    color:#fff;
+
+    border:1px solid rgba(255,255,255,.15);
+    background:transparent;
+
+    cursor:pointer;
+
+    transition:.2s;
+}
+
+.btn-follow-toggle:hover{
+    background:rgba(255,255,255,.08);
+}
+
+.btn-follow-toggle.active{
+    background:#ea5455;
+    border-color:#ea5455;
+}
+
+.btn-follow-toggle.active:hover{
+    background:#d9433f;
+}
+
+.btn-follow,
+.btn-read{
+    display:inline-flex;
+    align-items:center;
+
+    padding:14px 24px;
+
+    border-radius:10px;
+
+    font-weight:700;
+
+    margin-right:12px;
+
+    transition:.2s;
+}
+
+.btn-follow{
+    background:#4f6cff;
+}
+
+.btn-read{
+    background:#ff8a2f;
+}
+
+.btn-follow:hover,
+.btn-read:hover{
+    transform:translateY(-2px);
+}
+
+/* =========================
+   BODY
+========================= */
+
+.detail-layout{
+    display:grid;
+
+    grid-template-columns:minmax(0,1fr) 350px;
+
+    gap:22px;
+
+    padding:0 40px 40px;
+}
+
+.info-box,
+.chapter-box,
+.side-box{
+    background:#262c3f;
+
+    border-radius:14px;
+
+    padding:22px;
+}
+
+/* =========================
+   TRANSLATOR
+========================= */
+
+.detail-translator-card,
+.detail-translator-card:hover,
+.translator-top,
+.translator-top:hover,
+.translator-identity,
+.translator-identity:hover,
+.detail-translator-card .translator-avatar,
+.detail-translator-card .translator-avatar:hover{
+    transform:none !important;
+    transition:none !important;
+}
+
+.detail-translator-card{
+    background:#1f2434;
+
+    border-radius:12px;
+
+    padding:18px;
+
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+}
+
+.translator-top{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
+.translator-identity{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.detail-translator-card .translator-avatar{
+    width:48px !important;
+    height:48px !important;
+    flex-shrink:0;
+
+    border-radius:50%;
+
+    object-fit:cover;
+}
+
+.translator-name{
+    font-size:15px;
+    font-weight:700;
+
+    margin-bottom:3px;
+}
+
+.translator-count{
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:.3px;
+    color:#9aa1b5;
+}
+
+.translator-social{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.fb-chip{
+    display:flex;
+    align-items:center;
+    gap:6px;
+
+    background:#26314f;
+    color:#dbe4ff;
+
+    padding:6px 12px;
+
+    border-radius:999px;
+
+    font-size:12px;
+    font-weight:600;
+}
+
+.fb-icon{
+    width:18px;
+    height:18px;
+
+    border-radius:50%;
+
+    background:#1877f2;
+    color:#fff;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:11px;
+    font-weight:800;
+}
+
+.msg-icon{
+    width:30px;
+    height:30px;
+
+    border-radius:50%;
+
+    background:#3b4257;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:14px;
+}
+
+.btn-view-group{
+    align-self:flex-start;
+
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+
+    border:1px solid #4b5570;
+
+    padding:8px 16px;
+
+    border-radius:999px;
+
+    font-size:13px;
+    font-weight:600;
+    color:#fff;
+
+    transition:.2s;
+}
+
+.btn-view-group:hover{
+    background:#30364b;
+}
+
+.info-box hr{
+    border:none;
+    height:1px;
+
+    background:#3b4257;
+
+    margin:20px 0;
+}
+
+.description-content{
+    font-size:15px;
+    line-height:2;
+
+    color:#d6d9e5;
+}
+
+/* =========================
+   CHAPTER
+========================= */
+
+.chapter-box h3{
+    margin-bottom:18px;
+}
+
+.chapter-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    padding:16px 18px;
+
+    border-radius:10px;
+
+    background:#30364b;
+
+    color:#fff;
+
+    margin-bottom:10px;
+
+    transition:.2s;
+}
+
+.chapter-item:hover{
+    background:#3b4259;
+}
+
+.chapter-sub{
+    font-size:13px;
+    color:#bcc3d3;
+    margin-top:4px;
+}
+
+.chapter-date{
+    font-size:13px;
+    color:#d6dbe7;
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.sidebar{
+    display:flex;
+    flex-direction:column;
+    gap:22px;
+}
+
+.side-box h4{
+    margin-bottom:20px;
+    font-size:20px;
+}
+
+.stat-row{
+    margin-bottom:18px;
+    font-size:15px;
+    color:#e5e7ef;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:900px){
+
+    .manga-header{
+        flex-direction:column;
+        align-items:center;
+
+        text-align:center;
+
+        margin-top:-120px;
+    }
+
+    .detail-layout{
+        grid-template-columns:1fr;
+    }
+
+    .genre-list{
+        justify-content:center;
+    }
+
+    .author-line{
+        justify-content:center;
+    }
+}
+
+.share-link-row{
+    display:flex;
+    gap:8px;
+    margin-bottom:14px;
+}
+
+.share-link-input{
+    flex:1;
+    min-width:0;
+
+    background:#1f2434;
+    border:1px solid #3b4257;
+    border-radius:8px;
+
+    padding:10px 12px;
+
+    color:#c8cedd;
+    font-size:13px;
+}
+
+.copy-btn{
+    background:#363d50;
+    border:none;
+    border-radius:8px;
+
+    width:40px;
+
+    color:#fff;
+    cursor:pointer;
+}
+
+.share-buttons{
+    display:flex;
+    gap:10px;
+}
+
+.btn-share,
+.btn-facebook{
+    flex:1;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+
+    padding:10px;
+
+    border:none;
+    border-radius:8px;
+
+    font-weight:700;
+    font-size:14px;
+    color:#fff;
+
+    cursor:pointer;
+    text-align:center;
+}
+
+.btn-share{
+    background:#28c76f;
+}
+
+.btn-facebook{
+    background:#4267ff;
+}
+
+/* ========================= */
+/* TRANG ĐỌC TRUYỆN */
+/* ========================= */
+
+.reader-container{
+    max-width:900px;
+    margin:auto;
+    padding:30px 20px 100px;
+}
+
+/* Mode toggle pill */
+
+.reader-modebar{
+    display:flex;
+    justify-content:center;
+    margin-bottom:26px;
+}
+
+.mode-toggle{
+    display:inline-flex;
+    gap:4px;
+
+    background:#1b2030;
+
+    padding:4px;
+
+    border-radius:10px;
+}
+
+.mode-btn{
+    border:none;
+    cursor:pointer;
+
+    padding:9px 22px;
+
+    border-radius:8px;
+
+    background:transparent;
+    color:#9aa1b5;
+
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:.3px;
+
+    transition:.15s;
+}
+
+.mode-btn.active{
+    background:#5865f2;
+    color:#fff;
+}
+
+/* Header: back link + chapter title */
+
+.reader-header{
+    text-align:left;
+    margin-bottom:22px;
+}
+
+.back-btn{
+    display:inline-block;
+
+    font-size:14px;
+    font-weight:600;
+    color:#7c90ff;
+
+    margin-bottom:14px;
+}
+
+.reader-chapter-title{
+    font-size:22px;
+    font-weight:800;
+    color:#fff;
+}
+
+/* Nav buttons stacked full width */
+
+.chapter-nav{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+
+    margin-bottom:30px;
+
+    transition:opacity .25s ease, visibility .25s ease;
+}
+
+.nav-btn-block{
+    display:block;
+    width:100%;
+
+    text-align:center;
+
+    padding:14px;
+
+    border-radius:8px;
+
+    background:#262c3f;
+    color:#fff;
+    border:1px solid transparent;
+
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:.5px;
+
+    transition:.15s;
+}
+
+.nav-btn-block:hover{
+    background:#30364b;
+}
+
+.nav-btn-block.outline{
+    background:transparent;
+    border:1px solid #3b4257;
+}
+
+.nav-btn-block.disabled{
+    background:#1b2030;
+    color:#5b6172;
+    border-color:#232838;
+
+    cursor:not-allowed;
+    pointer-events:none;
+}
+
+.bottom-nav{
+    flex-direction:row;
+    margin-top:16px;
+    margin-bottom:0;
+}
+
+.bottom-nav .nav-btn-block{
+    flex:1;
+}
+
+/* ========================= */
+/* READER CONTENT */
+/* ========================= */
+
+#readerContent{
+    max-width:900px;
+    margin:auto;
+}
+
+.reader-page{
+    display:block;
+    margin:0 auto 4px;
+    max-width:100%;
+    height:auto;
+}
+
+/* ========================= */
+/* ZEN UI */
+/* ========================= */
+
+.reader-zen{
+    background:#0f1115;
+}
+
+.reader-zen footer{
+    display:none !important;
+}
+
+.reader-zen .reader-container{
+    max-width:100%;
+    padding:0;
+}
+
+.reader-zen #readerContent{
+    max-width:1200px;
+    margin:auto;
+}
+
+.reader-zen .reader-page{
+    display:block;
+    margin:auto;
+    width:auto;
+    max-width:100%;
+}
+
+.reader-page .navbar{
+    position:static !important;
+}
+
+/* Ẩn các phần chỉ dành cho Classic UI khi ở Zen */
+
+.reader-zen .bottom-nav,
+.reader-zen .end-page-nav,
+.reader-zen .reader-info-text{
+    display:none;
+}
+
+/* Immersive: ẩn navbar + thanh nổi khi đang lật trang */
+
+.reader-modebar,
+.reader-header,
+#floatingNav,
+.zen-counter{
+    transition:opacity .25s ease, visibility .25s ease;
+    opacity:1;
+    visibility:visible;
+}
+
+body.zen-immersive .reader-modebar,
+body.zen-immersive .reader-header,
+body.zen-immersive .chapter-nav-top,
+body.zen-immersive #floatingNav,
+body.zen-immersive .zen-counter{
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+}
+
+/* Zen stage: ảnh hiện tại + xem trước 2 bên */
+
+#zenReader{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+    gap:16px;
+    padding:20px;
+}
+
+.zen-stage{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:18px;
+    width:100%;
+}
+
+.zen-image{
+    max-width:68%;
+    max-height:88vh;
+
+    object-fit:contain;
+
+    border-radius:4px;
+    cursor:pointer;
+}
+
+.zen-side-image{
+    max-width:16%;
+    max-height:65vh;
+
+    object-fit:cover;
+
+    border-radius:4px;
+
+    opacity:.25;
+    filter:blur(1px);
+
+    visibility:hidden;
+}
+
+.zen-end-panel{
+    text-align:center;
+    padding:20px;
+}
+
+.zen-end-panel h2{
+    font-size:20px;
+    margin-bottom:20px;
+    color:#fff;
+}
+
+.zen-end-panel .chapter-nav{
+    max-width:360px;
+    margin:0 auto;
+}
+
+/* Immersive Zen: đưa stage lên toàn màn hình thật sự */
+
+body.zen-immersive #zenReader{
+    position:fixed;
+    inset:0;
+    z-index:9990;
+    background:#000;
+    padding:0;
+    justify-content:center;
+}
+
+body.zen-immersive .zen-stage{
+    height:100vh;
+}
+
+body.zen-immersive .zen-image{
+    max-height:100vh;
+}
+
+/* ========================= */
+/* END PAGE NAV (giống ảnh cuutruyen: nút full-width + 2 nút chia đôi) */
+/* ========================= */
+
+.end-page-nav{
+    flex-direction:column;
+    gap:10px;
+
+    margin-top:10px;
+}
+
+.end-page-nav .nav-btn-block{
+    width:100%;
+}
+
+.end-page-row{
+    display:flex;
+    gap:10px;
+}
+
+.end-page-row .nav-btn-block{
+    flex:1;
+}
+
+/* ========================= */
+/* SEO TEXT (chỉ Classic UI) */
+/* ========================= */
+
+.reader-info-text{
+    margin-top:30px;
+    padding-top:20px;
+
+    border-top:1px solid #262c3f;
+
+    font-size:13px;
+    line-height:1.9;
+    color:#8890a3;
+
+    text-align:center;
+}
+
+@media(max-width:900px){
+
+    .zen-side-image{
+        display:none;
+    }
+
+    .zen-image{
+        max-width:100%;
+    }
+
+}
+
+/* ========================= */
+/* FLOATING NAV (góc dưới trái) */
+/* ========================= */
+
+#floatingNav{
+    position:fixed;
+    left:20px;
+    bottom:20px;
+
+    background:#1b2030;
+    padding:8px;
+
+    border-radius:12px;
+
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+    z-index:9999;
+
+    box-shadow:0 5px 20px rgba(0,0,0,.4);
+
+    border:1px solid rgba(255,255,255,.06);
+}
+
+.float-arrow{
+    width:34px;
+    height:34px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border:none;
+    border-radius:8px;
+
+    background:#262c3f;
+    color:#fff;
+
+    font-size:18px;
+    font-weight:700;
+
+    cursor:pointer;
+    transition:.15s;
+}
+
+.float-arrow:hover{
+    background:#30364b;
+}
+
+.float-arrow.disabled{
+    opacity:.35;
+    pointer-events:none;
+}
+
+.float-select{
+    background:#262c3f;
+    color:#fff;
+
+    border:none;
+    border-radius:8px;
+
+    padding:9px 12px;
+
+    font-size:13px;
+    font-weight:600;
+
+    max-width:140px;
+}
+
+.zen-counter{
+    color:white;
+    margin-bottom:15px;
+    font-size:18px;
+    font-weight:700;
+}
+
+
+/* ========================= */
+/* MOBILE */
+/* ========================= */
+
+@media(max-width:768px){
+
+    .reader-container{
+        padding:20px 10px 100px;
+    }
+
+    .reader-chapter-title{
+        font-size:18px;
+    }
+
+    #floatingNav{
+        left:10px;
+        bottom:10px;
+    }
+
+    .float-select{
+        max-width:100px;
+    }
+
+}
