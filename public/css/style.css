@@ -65,13 +65,15 @@ main{
     transition:none !important;
 }
 
+
+
 /* =========================
    BANNER
 ========================= */
 
 .manga-banner{
     position:relative;
-    height:580px;
+    height:400px;
     overflow:hidden;
 
     background:#1b2030;
@@ -101,6 +103,32 @@ main{
     pointer-events:none;
 }
 
+/* Lớp tối ở dưới banner giống Cứu Truyện */
+
+.manga-banner::after{
+    content:"";
+
+    position:absolute;
+
+    left:0;
+    right:0;
+    bottom:0;
+
+    height:180px;
+
+    z-index:2;
+
+    background:linear-gradient(
+        to top,
+        rgba(16,18,27,.95) 0%,
+        rgba(16,18,27,.75) 35%,
+        rgba(16,18,27,.35) 70%,
+        transparent 100%
+    );
+
+    pointer-events:none;
+}
+
 /* =========================
    HEADER
 ========================= */
@@ -108,12 +136,12 @@ main{
 .manga-header{
     position:relative;
     z-index:5;
-
+    
     display:flex;
-    gap:28px;
+    gap:20px;
     align-items:flex-end;
 
-    margin-top:-290px;
+    margin-top:-82px;
 
     padding:0 40px 35px;
 }
@@ -126,12 +154,11 @@ main{
     width:190px;
     height:270px;
 
-    object-fit:cover;
+    border-radius:6px;
 
-    border-radius:12px;
+    border:4px solid white;
 
-    box-shadow:
-    0 15px 40px rgba(0,0,0,.55);
+    box-shadow:0 8px 20px rgba(0,0,0,.25);
 }
 
 .manga-info{
@@ -737,13 +764,21 @@ main{
     border:1px solid #3b4257;
 }
 
+/* Trạng thái disabled: xám hẳn, không hover, không click được — dùng khi
+   hết chương trước/sau (vd "ĐÂY LÀ CHƯƠNG MỚI NHẤT") */
+
 .nav-btn-block.disabled{
-    background:#1b2030;
-    color:#5b6172;
-    border-color:#232838;
+    background:#171a24;
+    color:#4b5064;
+    border-color:#1f2330;
 
     cursor:not-allowed;
     pointer-events:none;
+    opacity:.55;
+}
+
+.nav-btn-block.disabled:hover{
+    background:#171a24;
 }
 
 .bottom-nav{
@@ -1017,8 +1052,16 @@ body.zen-immersive .zen-image{
 }
 
 .float-arrow.disabled{
-    opacity:.35;
+    background:#171a24;
+    color:#4b5064;
+
+    cursor:not-allowed;
     pointer-events:none;
+    opacity:.5;
+}
+
+.float-arrow.disabled:hover{
+    background:#171a24;
 }
 
 .float-select{

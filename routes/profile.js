@@ -19,4 +19,9 @@ router.post(
     profileController.updateProfile
 );
 
+router.get(
+    "/library",
+    profileController.followLibrary
+);
+
 module.exports = router;

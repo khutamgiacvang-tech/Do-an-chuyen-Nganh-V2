@@ -6,6 +6,8 @@ const path = require("path");
 const AdmZip = require("adm-zip");
 const User = require("../models/User");
 const Notification = require("../models/Notification");
+const ReadingHistory = require("../models/ReadingHistory");
+const webpush = require("web-push");
 
 // =========================
 // Trang tạo truyện
@@ -15,13 +17,11 @@ exports.showCreate = async (req, res) => {
   try {
     if (!req.isAuthenticated()) {
       req.flash("error", "Vui lòng đăng nhập.");
-
       return res.redirect("/");
     }
 
     if (req.user.role !== "translator") {
       req.flash("error", "Bạn không có quyền.");
-
       return res.redirect("/");
     }
 
@@ -30,9 +30,7 @@ exports.showCreate = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-
     req.flash("error", "Có lỗi xảy ra.");
-
     res.redirect("/");
   }
 };
@@ -70,7 +68,6 @@ exports.create = async (req, res) => {
         }) +
         "-" +
         count;
-
       count++;
     }
 
@@ -90,80 +87,48 @@ exports.create = async (req, res) => {
 
     const manga = new Manga({
       title,
-
       alternativeTitles: alternativeTitles
         ? alternativeTitles
             .split(",")
             .map((i) => i.trim())
             .filter((i) => i !== "")
         : [],
-
       slug,
-
       cover,
-
       banner,
-
       author,
-
       artist,
-
       description,
-
       genres,
-
-      // Trạng thái truyện
       publishStatus: status,
-
-      // Trạng thái duyệt
       status: "pending",
-
       ageRating,
-
       translator: req.user._id,
     });
     await manga.save();
 
     // ==========================
-// Thông báo cho Admin
-// ==========================
+    // Thông báo cho Admin
+    // ==========================
 
-const admins = await User.find({
-    role: "admin"
-});
-
-for (const admin of admins) {
-
-    await Notification.create({
-
-        user: admin._id,
-
-        title: "📖 Truyện mới chờ duyệt",
-
-        message: `${req.user.username} vừa upload truyện "${manga.title}".`,
-
-        link: "/admin"
-
+    const admins = await User.find({
+        role: "admin"
     });
 
-}
+    for (const admin of admins) {
+        await Notification.create({
+            user: admin._id,
+            title: "📖 Truyện mới chờ duyệt",
+            message: `${req.user.username} vừa upload truyện "${manga.title}".`,
+            link: "/admin"
+        });
+    }
 
-    req.flash(
-      "success",
-
-      "Đăng truyện thành công.",
-    );
-
+    req.flash("success", "Đăng truyện thành công.");
     res.redirect(`/upload/${slug}/chapter`);
   } catch (err) {
     console.log(err);
-
-    req.flash(
-      "error",
-
-      "Có lỗi xảy ra.",
-    );
-
+    req.flash("error", "Có lỗi xảy ra.");
     res.redirect("/upload");
   }
 };
@@ -183,33 +148,17 @@ exports.showUploadChapter = async (req, res) => {
     });
 
     if (!manga) {
-      req.flash(
-        "error",
-
-        "Không tìm thấy truyện.",
-      );
-
+      req.flash("error", "Không tìm thấy truyện.");
       return res.redirect("/upload");
     }
 
-    res.render(
-      "manga/uploadChapter",
-
-      {
-        title: "Upload Chapter",
-
-        manga,
-      },
-    );
+    res.render("manga/uploadChapter", {
+      title: "Upload Chapter",
+      manga,
+    });
   } catch (err) {
     console.log(err);
-
-    req.flash(
-      "error",
-
-      "Có lỗi xảy ra.",
-    );
-
+    req.flash("error", "Có lỗi xảy ra.");
     res.redirect("/upload");
   }
 };
@@ -228,54 +177,43 @@ exports.uploadChapter = async (req, res) => {
 
     if (!manga) {
       req.flash("error", "Không tìm thấy truyện.");
-
       return res.redirect("/upload");
     }
 
     console.log("2. Đã tìm thấy manga:", manga.title);
 
-    const chapterNumber = Number(req.body.chapterNumber);
-
+    const rawChapterInput = req.body.chapterNumber?.trim();
     const title = req.body.title?.trim() || "Không có tiêu đề";
 
-    if (isNaN(chapterNumber) || chapterNumber <= 0) {
+    if (!rawChapterInput) {
       req.flash("error", "Số chapter không hợp lệ.");
-
       return res.redirect(`/upload/${manga.slug}/chapter`);
     }
 
     const existed = await Chapter.findOne({
       manga: manga._id,
-
-      chapterNumber,
+      chapterNumber: rawChapterInput,
     });
 
     if (existed) {
       req.flash("error", "Chapter này đã tồn tại.");
-
       return res.redirect(`/upload/${manga.slug}/chapter`);
     }
 
     if (!req.file) {
       req.flash("error", "Vui lòng chọn file ZIP.");
-
       return res.redirect(`/upload/${manga.slug}/chapter`);
     }
 
     console.log("3. Chuẩn bị tạo thư mục");
 
-    const folderName = `chapter-${chapterNumber}`;
-
+    const folderName = `chapter-${rawChapterInput}`;
     const chapterFolder = path.join(
       "public",
-
       "uploads",
-
       "manga",
-
       manga.slug,
-
-      folderName,
+      folderName
     );
 
     await fs.ensureDir(chapterFolder);
@@ -283,14 +221,11 @@ exports.uploadChapter = async (req, res) => {
     console.log("4. Đã tạo thư mục");
 
     const zip = new AdmZip(req.file.path);
-
     let entries = zip.getEntries();
 
     entries = entries.filter((entry) => {
       if (entry.isDirectory) return false;
-
       const ext = path.extname(entry.entryName).toLowerCase();
-
       return [".jpg", ".jpeg", ".png", ".webp", ".jfif"].includes(ext);
     });
 
@@ -298,82 +233,100 @@ exports.uploadChapter = async (req, res) => {
       a.entryName.localeCompare(b.entryName, undefined, {
         numeric: true,
         sensitivity: "base",
-      }),
+      })
     );
 
     let totalPages = 0;
-
     let index = 1;
 
     for (const entry of entries) {
       const ext = path.extname(entry.entryName).toLowerCase();
-
       const fileName = index + ext;
+      const savePath = path.join(chapterFolder, fileName);
 
-      const savePath = path.join(
-        chapterFolder,
-
-        fileName,
-      );
-
-      fs.writeFileSync(
-        savePath,
-
-        entry.getData(),
-      );
-
+      fs.writeFileSync(savePath, entry.getData());
       totalPages++;
-
       index++;
     }
 
     console.log("7. Đã giải nén");
 
-    await Chapter.create({
+    const chapter = await Chapter.create({
       manga: manga._id,
-
-      chapterNumber,
-
+      chapterNumber: rawChapterInput,
       title,
-
       folder: folderName,
-
       totalPages,
-
       uploadedBy: req.user._id,
     });
 
     console.log("8. Đã tạo Chapter");
 
     manga.totalChapters = (manga.totalChapters || 0) + 1;
+    const parsedNum = parseFloat(rawChapterInput);
 
-    manga.lastChapter = Math.max(manga.lastChapter || 0, chapterNumber);
+    if (!isNaN(parsedNum)) {
+      manga.lastChapter = Math.max(manga.lastChapter || 0, parsedNum);
+    }
 
     manga.lastUpdated = new Date();
-
     await manga.save();
 
-
     console.log("9. Đã cập nhật Manga");
+
+    // =========================
+    // GỬI THÔNG BÁO (IN-APP)
+    // =========================
+
+    const followers = await User.find({
+      followedManga: manga._id
+    });
+
+    for (const follower of followers) {
+      await Notification.create({
+        user: follower._id,
+        title: "📚 Chương mới",
+        message: `${manga.title} vừa cập nhật Chương ${rawChapterInput}`,
+        link: `/manga/${manga.slug}/chapter/${rawChapterInput}`,
+        isRead: false
+      });
+    }
+
+    // =========================
+    // GỬI WEB PUSH NOTIFICATION
+    // =========================
+
+    const pushFollowers = await User.find({
+      followedManga: manga._id,
+      pushSubscription: { $ne: null }
+    });
+
+    const baseUrl = `${req.protocol}://${req.get("host")}`;
+
+    for (const follower of pushFollowers) {
+      const payload = JSON.stringify({
+        title: "📚 Truyện bạn theo dõi có chương mới!",
+        body: `${manga.title} vừa mới được đăng chapter ${rawChapterInput}!`,
+        icon: manga.cover ? `${baseUrl}${manga.cover}` : `${baseUrl}/images/logo.png`,
+        image: manga.banner ? `${baseUrl}${manga.banner}` : "",
+        url: `/manga/${manga.slug}/chapter/${rawChapterInput}`
+      });
+
+      webpush.sendNotification(follower.pushSubscription, payload)
+        .catch(err => console.error("Lỗi gửi push notification:", err));
+    }
 
     if (req.file && fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
     }
 
     console.log("10. Thành công");
-
     req.flash("success", "Upload chapter thành công.");
-
     return res.redirect(`/my-manga/${manga.slug}`);
   } catch (err) {
     console.error("========== ERROR ==========");
-
     console.error(err);
-
-    console.error(err.stack);
-
     req.flash("error", err.message);
-
     return res.redirect(`/upload/${req.params.slug}/chapter`);
   }
 };
@@ -386,7 +339,6 @@ exports.myManga = async (req, res) => {
   try {
     if (!req.isAuthenticated()) {
       req.flash("error", "Vui lòng đăng nhập.");
-
       return res.redirect("/");
     }
 
@@ -397,63 +349,29 @@ exports.myManga = async (req, res) => {
     });
 
     const pending = mangas.filter((m) => m.status === "pending");
-
     const approved = mangas.filter((m) => m.status === "approved");
-
     const rejected = mangas.filter((m) => m.status === "rejected");
-
     const hidden = mangas.filter((m) => m.status === "hidden");
 
-    // =========================
-    // Dashboard
-    // =========================
-
     const totalManga = mangas.length;
-
-    const totalChapter = mangas.reduce(
-      (sum, manga) => sum + (manga.totalChapters || 0),
-
-      0,
-    );
-
-    const totalViews = mangas.reduce(
-      (sum, manga) => sum + (manga.views || 0),
-
-      0,
-    );
-
-   const totalFollowers = mangas.reduce(
-
-    (sum, manga) => sum + (manga.follows || 0),
-
-    0
-
-);
+    const totalChapter = mangas.reduce((sum, manga) => sum + (manga.totalChapters || 0), 0);
+    const totalViews = mangas.reduce((sum, manga) => sum + (manga.views || 0), 0);
+    const totalFollowers = mangas.reduce((sum, manga) => sum + (manga.follows || 0), 0);
 
     res.render("manga/myManga", {
       title: "Truyện của tôi",
-
       pending,
-
       approved,
-
       rejected,
-
       hidden,
-
       totalManga,
-
       totalChapter,
-
       totalViews,
-
       totalFollowers,
     });
   } catch (err) {
     console.log(err);
-
     req.flash("error", "Có lỗi xảy ra.");
-
     res.redirect("/");
   }
 };
@@ -470,48 +388,28 @@ exports.manageManga = async (req, res) => {
 
     const manga = await Manga.findOne({
       slug: req.params.slug,
-
       translator: req.user._id,
     });
 
     if (!manga) {
-      req.flash(
-        "error",
-
-        "Không tìm thấy truyện.",
-      );
-
+      req.flash("error", "Không tìm thấy truyện.");
       return res.redirect("/my-manga");
     }
 
     const chapters = await Chapter.find({
       manga: manga._id,
-    })
+    }).sort({
+      chapterNumber: -1,
+    });
 
-      .sort({
-        chapterNumber: -1,
-      });
-
-    res.render(
-      "manga/manage",
-
-      {
-        title: manga.title,
-
-        manga,
-
-        chapters,
-      },
-    );
+    res.render("manga/manage", {
+      title: manga.title,
+      manga,
+      chapters,
+    });
   } catch (err) {
     console.log(err);
-
-    req.flash(
-      "error",
-
-      "Có lỗi xảy ra.",
-    );
-
+    req.flash("error", "Có lỗi xảy ra.");
     res.redirect("/my-manga");
   }
 };
@@ -524,38 +422,21 @@ exports.showEdit = async (req, res) => {
   try {
     const manga = await Manga.findOne({
       slug: req.params.slug,
-
       translator: req.user._id,
     });
 
     if (!manga) {
-      req.flash(
-        "error",
-
-        "Không tìm thấy truyện.",
-      );
-
+      req.flash("error", "Không tìm thấy truyện.");
       return res.redirect("/my-manga");
     }
 
-    res.render(
-      "manga/edit",
-
-      {
-        title: "Sửa truyện",
-
-        manga,
-      },
-    );
+    res.render("manga/edit", {
+      title: "Sửa truyện",
+      manga,
+    });
   } catch (err) {
     console.log(err);
-
-    req.flash(
-      "error",
-
-      "Có lỗi xảy ra.",
-    );
-
+    req.flash("error", "Có lỗi xảy ra.");
     res.redirect("/my-manga");
   }
 };
@@ -568,65 +449,39 @@ exports.updateManga = async (req, res) => {
   try {
     const manga = await Manga.findOne({
       slug: req.params.slug,
-
       translator: req.user._id,
     });
 
     if (!manga) {
-      req.flash(
-        "error",
-
-        "Không tìm thấy truyện.",
-      );
-
+      req.flash("error", "Không tìm thấy truyện.");
       return res.redirect("/my-manga");
     }
 
     manga.title = req.body.title;
-
     manga.alternativeTitles = req.body.alternativeTitles
       ? req.body.alternativeTitles
           .split(",")
           .map((i) => i.trim())
           .filter((i) => i !== "")
       : [];
-
     manga.author = req.body.author;
-
     manga.artist = req.body.artist;
-
     manga.description = req.body.description;
-
     manga.publishStatus = req.body.publishStatus;
-
     manga.ageRating = req.body.ageRating;
-
     manga.genres = req.body.genres
       ? Array.isArray(req.body.genres)
         ? req.body.genres
         : [req.body.genres]
       : [];
-
     manga.lastUpdated = new Date();
 
     await manga.save();
-
-    req.flash(
-      "success",
-
-      "Đã cập nhật truyện.",
-    );
-
+    req.flash("success", "Đã cập nhật truyện.");
     res.redirect("/my-manga/" + manga.slug);
   } catch (err) {
     console.log(err);
-
-    req.flash(
-      "error",
-
-      "Cập nhật thất bại.",
-    );
-
+    req.flash("error", "Cập nhật thất bại.");
     res.redirect("back");
   }
 };
@@ -639,38 +494,21 @@ exports.showChangeCover = async (req, res) => {
   try {
     const manga = await Manga.findOne({
       slug: req.params.slug,
-
       translator: req.user._id,
     });
 
     if (!manga) {
-      req.flash(
-        "error",
-
-        "Không tìm thấy truyện.",
-      );
-
+      req.flash("error", "Không tìm thấy truyện.");
       return res.redirect("/my-manga");
     }
 
-    res.render(
-      "manga/changeCover",
-
-      {
-        title: "Đổi Cover",
-
-        manga,
-      },
-    );
+    res.render("manga/changeCover", {
+      title: "Đổi Cover",
+      manga,
+    });
   } catch (err) {
     console.log(err);
-
-    req.flash(
-      "error",
-
-      "Có lỗi.",
-    );
-
+    req.flash("error", "Có lỗi.");
     res.redirect("/my-manga");
   }
 };
@@ -683,64 +521,34 @@ exports.changeCover = async (req, res) => {
   try {
     const manga = await Manga.findOne({
       slug: req.params.slug,
-
       translator: req.user._id,
     });
 
     if (!manga) {
-      req.flash(
-        "error",
-
-        "Không tìm thấy truyện.",
-      );
-
+      req.flash("error", "Không tìm thấy truyện.");
       return res.redirect("/my-manga");
     }
 
     if (!req.file) {
-      req.flash(
-        "error",
-
-        "Chưa chọn ảnh.",
-      );
-
+      req.flash("error", "Chưa chọn ảnh.");
       return res.redirect(`/my-manga/${manga.slug}/cover`);
     }
 
-    // xóa cover cũ
-
     if (manga.cover) {
-      const old = path.join(
-        "public",
-
-        manga.cover,
-      );
-
+      const old = path.join("public", manga.cover);
       if (fs.existsSync(old)) {
         fs.unlinkSync(old);
       }
     }
 
     manga.cover = "/uploads/covers/" + req.file.filename;
-
     await manga.save();
 
-    req.flash(
-      "success",
-
-      "Đổi Cover thành công.",
-    );
-
+    req.flash("success", "Đổi Cover thành công.");
     res.redirect("/my-manga/" + manga.slug);
   } catch (err) {
     console.log(err);
-
-    req.flash(
-      "error",
-
-      "Không thể đổi Cover.",
-    );
-
+    req.flash("error", "Không thể đổi Cover.");
     res.redirect("back");
   }
 };
@@ -753,34 +561,21 @@ exports.showChangeBanner = async (req, res) => {
   try {
     const manga = await Manga.findOne({
       slug: req.params.slug,
-
       translator: req.user._id,
     });
 
     if (!manga) {
       req.flash("error", "Không tìm thấy truyện.");
-
       return res.redirect("/my-manga");
     }
 
-    res.render(
-      "manga/changeBanner",
-
-      {
-        title: "Đổi Banner",
-
-        manga,
-      },
-    );
+    res.render("manga/changeBanner", {
+      title: "Đổi Banner",
+      manga,
+    });
   } catch (err) {
     console.log(err);
-
-    req.flash(
-      "error",
-
-      "Có lỗi xảy ra.",
-    );
-
+    req.flash("error", "Có lỗi xảy ra.");
     res.redirect("/my-manga");
   }
 };
@@ -793,56 +588,34 @@ exports.changeBanner = async (req, res) => {
   try {
     const manga = await Manga.findOne({
       slug: req.params.slug,
-
       translator: req.user._id,
     });
 
     if (!manga) {
       req.flash("error", "Không tìm thấy truyện.");
-
       return res.redirect("/my-manga");
     }
 
     if (!req.file) {
       req.flash("error", "Vui lòng chọn Banner.");
-
       return res.redirect(`/my-manga/${manga.slug}/banner`);
     }
 
-    // Xóa banner cũ
-
     if (manga.banner) {
-      const oldPath = path.join(
-        "public",
-
-        manga.banner,
-      );
-
+      const oldPath = path.join("public", manga.banner);
       if (fs.existsSync(oldPath)) {
         fs.unlinkSync(oldPath);
       }
     }
 
     manga.banner = "/uploads/banners/" + req.file.filename;
-
     await manga.save();
 
-    req.flash(
-      "success",
-
-      "Đổi Banner thành công.",
-    );
-
+    req.flash("success", "Đổi Banner thành công.");
     res.redirect("/my-manga/" + manga.slug);
   } catch (err) {
     console.log(err);
-
-    req.flash(
-      "error",
-
-      "Không thể đổi Banner.",
-    );
-
+    req.flash("error", "Không thể đổi Banner.");
     res.redirect("back");
   }
 };
@@ -855,98 +628,48 @@ exports.deleteManga = async (req, res) => {
   try {
     const manga = await Manga.findOne({
       slug: req.params.slug,
-
       translator: req.user._id,
     });
 
     if (!manga) {
       req.flash("error", "Không tìm thấy truyện.");
-
       return res.redirect("/my-manga");
     }
 
-    // Kiểm tra còn chapter hay không
     const totalChapter = await Chapter.countDocuments({
       manga: manga._id,
     });
 
     if (totalChapter > 0) {
-
-    req.flash(
-        "error",
-        "Không thể xóa truyện khi vẫn còn Chapter."
-    );
-
-    return res.redirect("/my-manga/" + manga.slug);
-
-}
-
-    // Xóa Cover
+      req.flash("error", "Không thể xóa truyện khi vẫn còn Chapter.");
+      return res.redirect("/my-manga/" + manga.slug);
+    }
 
     if (manga.cover) {
-      const coverPath = path.join(
-        "public",
-
-        manga.cover,
-      );
-
+      const coverPath = path.join("public", manga.cover);
       if (fs.existsSync(coverPath)) {
         fs.unlinkSync(coverPath);
       }
     }
 
-    // Xóa Banner
-
     if (manga.banner) {
-      const bannerPath = path.join(
-        "public",
-
-        manga.banner,
-      );
-
+      const bannerPath = path.join("public", manga.banner);
       if (fs.existsSync(bannerPath)) {
         fs.unlinkSync(bannerPath);
       }
     }
 
-    // Xóa thư mục truyện
-
-    const mangaFolder = path.join(
-      "public",
-
-      "uploads",
-
-      "manga",
-
-      manga.slug,
-    );
-
+    const mangaFolder = path.join("public", "uploads", "manga", manga.slug);
     if (fs.existsSync(mangaFolder)) {
       await fs.remove(mangaFolder);
     }
 
-    // Xóa Manga
-
-    await Manga.deleteOne({
-      _id: manga._id,
-    });
-
-    req.flash(
-      "success",
-
-      "Đã xóa truyện.",
-    );
-
+    await Manga.deleteOne({ _id: manga._id });
+    req.flash("success", "Đã xóa truyện.");
     res.redirect("/my-manga");
   } catch (err) {
     console.log(err);
-
-    req.flash(
-      "error",
-
-      "Không thể xóa truyện.",
-    );
-
+    req.flash("error", "Không thể xóa truyện.");
     res.redirect("back");
   }
 };
@@ -959,100 +682,47 @@ exports.deleteChapter = async (req, res) => {
   try {
     const manga = await Manga.findOne({
       slug: req.params.slug,
-
       translator: req.user._id,
     });
 
     if (!manga) {
       req.flash("error", "Không tìm thấy truyện.");
-
       return res.redirect("/my-manga");
     }
 
     const chapter = await Chapter.findOne({
       _id: req.params.id,
-
       manga: manga._id,
     });
 
     if (!chapter) {
       req.flash("error", "Không tìm thấy Chapter.");
-
       return res.redirect("/my-manga/" + manga.slug);
     }
 
-    // ======================
-    // Xóa thư mục chapter
-    // ======================
-
-    const folder = path.join(
-      "public",
-
-      "uploads",
-
-      "manga",
-
-      manga.slug,
-
-      chapter.folder,
-    );
-
+    const folder = path.join("public", "uploads", "manga", manga.slug, chapter.folder);
     if (await fs.pathExists(folder)) {
       await fs.remove(folder);
     }
 
-    // ======================
-    // Xóa database
-    // ======================
+    await Chapter.deleteOne({ _id: chapter._id });
 
-    await Chapter.deleteOne({
-      _id: chapter._id,
-    });
+    const lastChapter = await Chapter.find({ manga: manga._id }).sort({ chapterNumber: -1 }).limit(1);
 
-    // ======================
-    // Cập nhật Manga
-    // ======================
-
-    const lastChapter = await Chapter.find({
-      manga: manga._id,
-    })
-
-      .sort({
-        chapterNumber: -1,
-      })
-
-      .limit(1);
-
-    manga.totalChapters = await Chapter.countDocuments({
-      manga: manga._id,
-    });
-
-    manga.lastChapter =
-      lastChapter.length > 0 ? lastChapter[0].chapterNumber : 0;
-
+    manga.totalChapters = await Chapter.countDocuments({ manga: manga._id });
+    manga.lastChapter = lastChapter.length > 0 ? lastChapter[0].chapterNumber : 0;
     manga.lastUpdated = new Date();
-
     await manga.save();
 
-    req.flash(
-      "success",
-
-      "Đã xóa Chapter.",
-    );
-
+    req.flash("success", "Đã xóa Chapter.");
     res.redirect("/my-manga/" + manga.slug);
   } catch (err) {
     console.log(err);
-
-    req.flash(
-      "error",
-
-      "Không thể xóa Chapter.",
-    );
-
+    req.flash("error", "Không thể xóa Chapter.");
     res.redirect("back");
   }
 };
+
 // =========================
 // Trang sửa Chapter
 // =========================
@@ -1065,53 +735,38 @@ exports.showEditChapter = async (req, res) => {
 
     const manga = await Manga.findOne({
       slug: req.params.slug,
-
       translator: req.user._id,
     });
 
     if (!manga) {
       req.flash("error", "Không tìm thấy truyện.");
-
       return res.redirect("/my-manga");
     }
 
     const chapter = await Chapter.findOne({
       _id: req.params.id,
-
       manga: manga._id,
     });
 
     if (!chapter) {
       req.flash("error", "Không tìm thấy Chapter.");
-
       return res.redirect("/my-manga/" + manga.slug);
     }
 
-    res.render(
-      "manga/editChapter",
-
-      {
-        title: "Sửa Chapter",
-
-        manga,
-
-        chapter,
-      },
-    );
+    res.render("manga/editChapter", {
+      title: "Sửa Chapter",
+      manga,
+      chapter,
+    });
   } catch (err) {
     console.log(err);
-
-    req.flash(
-      "error",
-
-      "Có lỗi xảy ra.",
-    );
-
+    req.flash("error", "Có lỗi xảy ra.");
     res.redirect("/my-manga");
   }
 };
+
 // =========================
-// Cập nhật Chapter
+// Cập nhật Chapter (Hỗ trợ thay đổi title và ghi đè ảnh ZIP mới)
 // =========================
 
 exports.updateChapter = async (req, res) => {
@@ -1123,7 +778,6 @@ exports.updateChapter = async (req, res) => {
 
     if (!manga) {
       req.flash("error", "Không tìm thấy truyện.");
-
       return res.redirect("/my-manga");
     }
 
@@ -1134,26 +788,74 @@ exports.updateChapter = async (req, res) => {
 
     if (!chapter) {
       req.flash("error", "Không tìm thấy Chapter.");
-
       return res.redirect("/my-manga/" + manga.slug);
     }
 
-    chapter.title = req.body.title;
+    if (req.body.title) {
+      chapter.title = req.body.title.trim();
+    }
+
+    // Nếu có upload file ZIP mới khi sửa chapter
+    if (req.file) {
+      const chapterFolder = path.join(
+        "public",
+        "uploads",
+        "manga",
+        manga.slug,
+        chapter.folder
+      );
+
+      if (await fs.pathExists(chapterFolder)) {
+        await fs.remove(chapterFolder);
+      }
+      await fs.ensureDir(chapterFolder);
+
+      const zip = new AdmZip(req.file.path);
+      let entries = zip.getEntries();
+
+      entries = entries.filter((entry) => {
+        if (entry.isDirectory) return false;
+        const ext = path.extname(entry.entryName).toLowerCase();
+        return [".jpg", ".jpeg", ".png", ".webp", ".jfif"].includes(ext);
+      });
+
+      entries.sort((a, b) =>
+        a.entryName.localeCompare(b.entryName, undefined, {
+          numeric: true,
+          sensitivity: "base",
+        })
+      );
+
+      let totalPages = 0;
+      let index = 1;
+
+      for (const entry of entries) {
+        const ext = path.extname(entry.entryName).toLowerCase();
+        const fileName = index + ext;
+        const savePath = path.join(chapterFolder, fileName);
+
+        fs.writeFileSync(savePath, entry.getData());
+        totalPages++;
+        index++;
+      }
+
+      chapter.totalPages = totalPages;
+
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+    }
 
     await chapter.save();
-
     manga.lastUpdated = new Date();
-
     await manga.save();
 
-    req.flash("success", "Đã cập nhật Chapter.");
-
+    req.flash("success", "Đã cập nhật Chapter thành công.");
     res.redirect("/my-manga/" + manga.slug);
   } catch (err) {
-    console.log(err);
-
-    req.flash("error", "Không thể cập nhật Chapter.");
-
+    console.error("========== UPDATE CHAPTER ERROR ==========");
+    console.error(err);
+    req.flash("error", "Không thể cập nhật Chapter: " + err.message);
     res.redirect("back");
   }
 };
@@ -1163,61 +865,40 @@ exports.updateChapter = async (req, res) => {
 // =========================
 
 exports.showManga = async (req, res) => {
-
     try {
-
         const manga = await Manga.findOne({
-    slug: req.params.slug,
-    status: "approved"
-})
-.populate(
-    "translator",
-    "username displayName avatar"
-);
+            slug: req.params.slug,
+            status: "approved"
+        }).populate("translator", "username displayName avatar followedManga");
 
-if (!manga) {
-    return res.redirect("/");
-}
+        if (!manga) {
+            return res.redirect("/");
+        }
 
-// Đếm số truyện của nhóm dịch
-if (manga.translator) {
+        if (manga.translator) {
+            const mangaCount = await Manga.countDocuments({
+                translator: manga.translator._id,
+                status: "approved"
+            });
+            manga.translator = manga.translator.toObject();
+            manga.translator.mangaCount = mangaCount;
+        }
 
-    const mangaCount = await Manga.countDocuments({
-        translator: manga.translator._id,
-        status: "approved"
-    });
+        const chapters = await Chapter.find({ manga: manga._id }).sort({ chapterNumber: -1 });
 
-    manga.translator = manga.translator.toObject();
-    manga.translator.mangaCount = mangaCount;
-}
-
-        const chapters = await Chapter.find({
-            manga: manga._id
-        }).sort({
-            chapterNumber: -1
-        });
-
-        // View chỉ tăng 1 lần mỗi session
         const viewedKey = `viewed_${manga._id}`;
-
         if (!req.session[viewedKey]) {
-
             manga.views += 1;
             await manga.save();
-
             req.session[viewedKey] = true;
         }
 
-        // Đã theo dõi truyện này chưa (dựa theo session)
-        const isFollowing =
-            !!req.session.followedManga &&
-            req.session.followedManga.includes(manga._id.toString());
+        let isFollowing = false;
+        if (req.isAuthenticated() && req.user && req.user.followedManga) {
+            isFollowing = req.user.followedManga.some(id => id.toString() === manga._id.toString());
+        }
 
-        // Có phải chính translator đã đăng truyện này không
-        const isOwner =
-            req.isAuthenticated() &&
-            manga.translator &&
-            manga.translator._id.toString() === req.user._id.toString();
+        const isOwner = req.isAuthenticated() && manga.translator && manga.translator._id.toString() === req.user._id.toString();
 
         res.render("manga/detail", {
             title: manga.title,
@@ -1226,80 +907,56 @@ if (manga.translator) {
             isFollowing,
             isOwner
         });
-
     } catch (err) {
-
         console.error(err);
-
         res.redirect("/");
     }
 };
 
 // =========================
 // Theo dõi / Bỏ theo dõi truyện
-// (dùng session, chưa cần model Follow riêng)
 // =========================
 
 exports.toggleFollow = async (req, res) => {
-  try {
-    if (!req.isAuthenticated()) {
-      req.flash("error", "Vui lòng đăng nhập để theo dõi truyện.");
+    try {
+        if (!req.isAuthenticated()) {
+            req.flash("error", "Vui lòng đăng nhập để theo dõi truyện.");
+            return res.redirect("/manga/" + req.params.slug);
+        }
 
-      return res.redirect("/manga/" + req.params.slug);
+        const manga = await Manga.findOne({ slug: req.params.slug });
+        if (!manga) {
+            req.flash("error", "Không tìm thấy truyện.");
+            return res.redirect("/");
+        }
+
+        if (manga.translator && manga.translator.toString() === req.user._id.toString()) {
+            req.flash("error", "Bạn không thể theo dõi truyện của chính mình.");
+            return res.redirect("/manga/" + manga.slug);
+        }
+
+        const mangaId = manga._id.toString();
+        const index = req.user.followedManga.findIndex(id => id.toString() === mangaId);
+
+        if (index === -1) {
+            req.user.followedManga.push(manga._id);
+            manga.follows = (manga.follows || 0) + 1;
+            req.flash("success", "Đã theo dõi truyện.");
+        } else {
+            req.user.followedManga.splice(index, 1);
+            manga.follows = Math.max((manga.follows || 0) - 1, 0);
+            req.flash("success", "Đã bỏ theo dõi truyện.");
+        }
+
+        await req.user.save();
+        await manga.save();
+
+        res.redirect("/manga/" + manga.slug);
+    } catch (err) {
+        console.error(err);
+        req.flash("error", "Có lỗi xảy ra.");
+        res.redirect("/manga/" + req.params.slug);
     }
-
-    const manga = await Manga.findOne({
-      slug: req.params.slug,
-    });
-
-    if (!manga) {
-      req.flash("error", "Không tìm thấy truyện.");
-
-      return res.redirect("/");
-    }
-
-    if (manga.translator.toString() === req.user._id.toString()) {
-      req.flash("error", "Bạn không thể theo dõi truyện của chính mình.");
-
-      return res.redirect("/manga/" + manga.slug);
-    }
-
-    if (!req.session.followedManga) {
-      req.session.followedManga = [];
-    }
-
-    const mangaId = manga._id.toString();
-
-    const index = req.session.followedManga.indexOf(mangaId);
-
-    if (index === -1) {
-      // Chưa follow -> follow
-
-      req.session.followedManga.push(mangaId);
-
-      manga.follows = (manga.follows || 0) + 1;
-
-      req.flash("success", "Đã theo dõi truyện.");
-    } else {
-      // Đã follow -> bỏ follow
-
-      req.session.followedManga.splice(index, 1);
-
-      manga.follows = Math.max((manga.follows || 0) - 1, 0);
-
-      req.flash("success", "Đã bỏ theo dõi truyện.");
-    }
-
-    await manga.save();
-
-    res.redirect("/manga/" + manga.slug);
-  } catch (err) {
-    console.log(err);
-
-    req.flash("error", "Có lỗi xảy ra.");
-
-    res.redirect("/manga/" + req.params.slug);
-  }
 };
 
 // =========================
@@ -1307,9 +964,7 @@ exports.toggleFollow = async (req, res) => {
 // =========================
 
 exports.readChapter = async (req, res) => {
-
     try {
-
         const manga = await Manga.findOne({
             slug: req.params.slug,
             status: "approved"
@@ -1339,87 +994,45 @@ exports.readChapter = async (req, res) => {
         );
 
         let pages = [];
-
         if (fs.existsSync(chapterFolder)) {
-
             pages = fs.readdirSync(chapterFolder)
-
                 .filter(file => {
-
-                    return (
-                        file.endsWith(".jpg") ||
-                        file.endsWith(".jpeg") ||
-                        file.endsWith(".png") ||
-                        file.endsWith(".jfif") ||
-                        file.endsWith(".webp")
-                    );
-
+                    return [".jpg", ".jpeg", ".png", ".jfif", ".webp"].some(ext => file.toLowerCase().endsWith(ext));
                 })
-
-                .sort((a, b) => {
-
-                    const numA = parseInt(a);
-                    const numB = parseInt(b);
-
-                    return numA - numB;
-
-                })
-
-                .map(file => {
-
-                    return (
-                        "/uploads/manga/" +
-                        manga.slug +
-                        "/" +
-                        chapter.folder +
-                        "/" +
-                        file
-                    );
-
-                });
-
+                .sort((a, b) => parseInt(a) - parseInt(b))
+                .map(file => `/uploads/manga/${manga.slug}/${chapter.folder}/${file}`);
         }
 
-        const allChapters = await Chapter.find({
-            manga: manga._id
-        }).sort({
-            chapterNumber: 1
-        });
-
-        const currentIndex = allChapters.findIndex(
-            c => c._id.toString() === chapter._id.toString()
-        );
-
-        const prevChapter =
-            currentIndex > 0
-                ? allChapters[currentIndex - 1]
-                : null;
-
-        const nextChapter =
-            currentIndex < allChapters.length - 1
-                ? allChapters[currentIndex + 1]
-                : null;
-
-        // =========================
-        // TÍNH VIEW 1 LẦN / CHAPTER
-        // =========================
+        const allChapters = await Chapter.find({ manga: manga._id }).sort({ chapterNumber: 1 });
+        const currentIndex = allChapters.findIndex(c => c._id.toString() === chapter._id.toString());
+        const prevChapter = currentIndex > 0 ? allChapters[currentIndex - 1] : null;
+        const nextChapter = currentIndex < allChapters.length - 1 ? allChapters[currentIndex + 1] : null;
 
         if (!req.session.viewedChapters) {
             req.session.viewedChapters = [];
         }
 
         const viewKey = `${manga._id}_${chapter._id}`;
-
         if (!req.session.viewedChapters.includes(viewKey)) {
-
             manga.views += 1;
             manga.weeklyViews += 1;
             manga.monthlyViews += 1;
-
             await manga.save();
-
             req.session.viewedChapters.push(viewKey);
+        }
 
+        let savedScroll = 0;
+        let savedProgress = 0;
+        if (req.user) {
+            const history = await ReadingHistory.findOne({
+                user: req.user._id,
+                manga: manga._id,
+                chapterNumber: chapter.chapterNumber
+            });
+            if (history) {
+                savedScroll = history.scrollPosition || 0;
+                savedProgress = history.progress || 0;
+            }
         }
 
         res.render("manga/read", {
@@ -1429,15 +1042,137 @@ exports.readChapter = async (req, res) => {
             pages,
             allChapters,
             prevChapter,
-            nextChapter
+            nextChapter,
+            savedScroll,
+            savedProgress
+        });
+    } catch (err) {
+        console.log(err);
+        res.redirect("/");
+    }
+};
+
+exports.saveHistory = async (req, res) => {
+    try {
+        if (!req.user) {
+            return res.json({ success: false });
+        }
+
+        const {
+            mangaId,
+            mangaTitle,
+            mangaSlug,
+            cover,
+            chapterTitle,
+            chapterNumber,
+            progress,
+            scrollPosition
+        } = req.body;
+
+        const oldHistory = await ReadingHistory.findOne({
+            user: req.user._id,
+            manga: mangaId,
+            chapterNumber
         });
 
+        let finalProgress = progress;
+        let finalScroll = scrollPosition;
+
+        if (oldHistory) {
+            finalProgress = Math.max(oldHistory.progress || 0, progress || 0);
+            if (progress < oldHistory.progress) {
+                finalScroll = oldHistory.scrollPosition || 0;
+            }
+        }
+
+        await ReadingHistory.findOneAndUpdate(
+            { user: req.user._id, manga: mangaId, chapterNumber },
+            {
+                manga: mangaId,
+                mangaTitle,
+                mangaSlug,
+                cover,
+                chapterNumber,
+                chapterTitle,
+                progress: finalProgress,
+                scrollPosition: finalScroll,
+                updatedAt: new Date()
+            },
+            { upsert: true, new: true }
+        );
+
+        res.json({ success: true });
     } catch (err) {
-
         console.log(err);
+        res.status(500).json({ success: false });
+    }
+};
 
-        res.redirect("/");
-
+exports.searchAjax = async (req, res) => {
+    const keyword = req.query.q || "";
+    if (!keyword.trim()) {
+        return res.json([]);
     }
 
+    const mangas = await Manga.find({
+        title: { $regex: keyword, $options: "i" }
+    }).select("title slug cover").limit(8);
+
+    res.json(mangas);
+};
+
+exports.history = async (req, res) => {
+    try {
+        if (!req.user) {
+            return res.redirect("/login");
+        }
+
+        const histories = await ReadingHistory.find({
+            user: req.user._id
+        }).sort({ updatedAt: -1 }).lean();
+
+        const grouped = {};
+        for (const item of histories) {
+            const mangaId = item.manga.toString();
+
+            if (!grouped[mangaId]) {
+                grouped[mangaId] = {
+                    manga: item.manga,
+                    mangaTitle: item.mangaTitle,
+                    mangaSlug: item.mangaSlug,
+                    cover: item.cover,
+                    timeAgo: item.timeAgo || 'Vừa xong',
+                    chapters: []
+                };
+            }
+
+            if (grouped[mangaId].chapters.length < 3) {
+                let chapterTitle = item.chapterTitle || item.title || '';
+                if (!chapterTitle) {
+                    const foundChap = await Chapter.findOne({
+                        manga: item.manga,
+                        chapterNumber: item.chapterNumber
+                    }).lean();
+                    if (foundChap && foundChap.title && foundChap.title !== 'Không có tiêu đề') {
+                        chapterTitle = foundChap.title;
+                    }
+                }
+
+                grouped[mangaId].chapters.push({
+                    chapterNumber: item.chapterNumber,
+                    title: chapterTitle,
+                    progress: item.progress || 0
+                });
+            }
+        }
+
+        const historyList = Object.values(grouped);
+        res.render("manga/history", {
+            title: "Lịch sử đọc",
+            histories: historyList
+        });
+    } catch (err) {
+        console.log(err);
+        res.redirect("/");
+    }
 };

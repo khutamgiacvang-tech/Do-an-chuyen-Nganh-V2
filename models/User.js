@@ -89,6 +89,21 @@ const userSchema = new mongoose.Schema(
         enum: ["active", "banned"],
         default: "active",
     },
+
+    followedManga: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Manga",
+        }
+    ],
+
+    // =========================
+    // Web Push Notification
+    // =========================
+    pushSubscription: {
+        type: Object,
+        default: null,
+    },
 },
 {
     timestamps: true,

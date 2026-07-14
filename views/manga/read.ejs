@@ -47,7 +47,7 @@
         <% } else { %>
 
             <span class="nav-btn-block disabled">
-                CHƯƠNG SAU
+                ĐÂY LÀ CHƯƠNG MỚI NHẤT
             </span>
 
         <% } %>
@@ -160,32 +160,6 @@
 
     </div>
 
-    <div class="chapter-nav bottom-nav">
-
-        <% if(prevChapter){ %>
-
-        <a
-            href="/manga/<%= manga.slug %>/chapter/<%= prevChapter.chapterNumber %>"
-            class="nav-btn-block outline"
-        >
-            ← CHƯƠNG TRƯỚC
-        </a>
-
-        <% } %>
-
-        <% if(nextChapter){ %>
-
-        <a
-            href="/manga/<%= manga.slug %>/chapter/<%= nextChapter.chapterNumber %>"
-            class="nav-btn-block"
-        >
-            CHƯƠNG SAU →
-        </a>
-
-        <% } %>
-
-    </div>
-
     <div class="chapter-nav end-page-nav">
 
         <% if(nextChapter){ %>
@@ -291,7 +265,7 @@
 
         <% } else { %>
 
-            <span class="float-arrow disabled">›</span>
+            <span class="float-arrow disabled" title="Đây là chương mới nhất">›</span>
 
         <% } %>
 
@@ -479,4 +453,91 @@ zenImage.addEventListener("click",(e)=>{
 
 document.body.classList.add("reader-page");
 
+/* =========================
+   LƯU TIẾN ĐỘ ĐỌC
+========================= */
+
+let saveTimer;
+
+function saveReadingProgress(){
+
+    const totalHeight =
+        document.documentElement.scrollHeight -
+        window.innerHeight;
+
+    if(totalHeight <= 0) return;
+
+    const currentScroll = window.scrollY;
+
+    const percent = Math.min(
+        100,
+        Math.round((currentScroll / totalHeight) * 100)
+    );
+
+    fetch("/history/save", {
+
+        method: "POST",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+
+            mangaId: "<%= manga._id %>",
+
+            mangaTitle: "<%= manga.title %>",
+
+            mangaSlug: "<%= manga.slug %>",
+
+            cover: "<%= manga.cover %>",
+
+            chapterNumber: <%= chapter.chapterNumber %>,
+
+            progress: percent,
+
+            scrollPosition: currentScroll
+
+        })
+
+    }).catch(err => console.error(err));
+
+}
+
+window.addEventListener("scroll", () => {
+
+    clearTimeout(saveTimer);
+
+    saveTimer = setTimeout(() => {
+
+        saveReadingProgress();
+
+    }, 1000);
+
+});
+
+
+/* =========================
+   KHÔI PHỤC VỊ TRÍ ĐỌC
+========================= */
+
+window.addEventListener("load", () => {
+
+    const savedPosition =
+        <%= savedScroll || 0 %>;
+
+    if(savedPosition > 0){
+
+        setTimeout(() => {
+
+            window.scrollTo({
+                top: savedPosition,
+                behavior: "smooth"
+            });
+
+        }, 800);
+
+    }
+
+});
 </script>

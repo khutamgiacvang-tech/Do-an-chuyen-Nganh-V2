@@ -422,6 +422,15 @@ body{
     font-size:12px;
 }
 
+.row-arrow-left{
+    left:-18px;
+    right:auto;
+}
+
+.row-arrow-right{
+    right:-18px;
+}
+
 /* ===========================
         RANK ROW (truyện nổi bật)
 =========================== */

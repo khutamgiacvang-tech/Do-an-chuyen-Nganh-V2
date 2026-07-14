@@ -60,3 +60,48 @@ exports.updateProfile = async (req, res) => {
     res.redirect("/profile");
   }
 };
+
+const Manga = require("../models/Manga");
+
+exports.followLibrary = async (req, res) => {
+
+    try {
+
+        if (!req.isAuthenticated()) {
+
+            req.flash(
+                "error",
+                "Vui lòng đăng nhập."
+            );
+
+            return res.redirect("/");
+        }
+
+        const mangas = await Manga.find({
+            _id: {
+                $in: req.user.followedManga || []
+            }
+        })
+        .populate(
+            "translator",
+            "username displayName avatar"
+        )
+        .sort({
+            lastUpdated: -1
+        });
+
+        res.render(
+            "profile/library",
+            {
+                title: "Danh sách theo dõi",
+                mangas
+            }
+        );
+
+    } catch (err) {
+
+        console.log(err);
+
+        res.redirect("/");
+    }
+};

@@ -6,11 +6,11 @@ exports.home = async (req, res) => {
     try {
 
         const mangas = await Manga.find({
-            status: "approved"
-        })
-        .sort({ createdAt: -1 })
-        .limit(12)
-        .lean();
+    status: "approved"
+})
+.sort({ lastUpdated: -1 })
+.limit(12)
+.lean();
 
         for (const manga of mangas) {
 

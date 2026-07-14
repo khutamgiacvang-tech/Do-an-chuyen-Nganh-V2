@@ -94,8 +94,19 @@ function timeAgo(date){
 
     <div class="row-wrapper">
 
+        <!-- Nút lùi -->
+
+        <button
+            type="button"
+            class="row-arrow row-arrow-left"
+            onclick="document.getElementById('rowNew').scrollBy({left:-600,behavior:'smooth'})"
+        >
+            ‹
+        </button>
+
         <div class="home-row home-row-new" id="rowNew">
-            <% mangas.forEach(manga => { %>
+
+            <% mangas.slice(0,24).forEach(manga => { %>
 
             <a href="/manga/<%= manga.slug %>" class="home-card">
 
@@ -109,7 +120,8 @@ function timeAgo(date){
                     <h3><%= manga.title %></h3>
 
                     <p>
-                        C. <%= manga.lastChapter || 0 %> - <%= timeAgo(manga.lastChapterDate) %>
+                        C. <%= manga.lastChapter || 0 %> -
+                        <%= timeAgo(manga.lastChapterDate) %>
                     </p>
 
                 </div>
@@ -120,9 +132,11 @@ function timeAgo(date){
 
         </div>
 
+        <!-- Nút tiến -->
+
         <button
             type="button"
-            class="row-arrow"
+            class="row-arrow row-arrow-right"
             onclick="document.getElementById('rowNew').scrollBy({left:600,behavior:'smooth'})"
         >
             ›
@@ -131,7 +145,7 @@ function timeAgo(date){
     </div>
 
     <div class="section-footer">
-        <a href="/manga">› Xem danh sách truyện</a>
+        <a href="/manga?sort=new">› Xem danh sách truyện mới</a>
     </div>
 
 </section>
@@ -158,134 +172,157 @@ function timeAgo(date){
 
     <div class="row-wrapper">
 
+        <!-- Nút trái -->
+
+        <button
+            type="button"
+            class="row-arrow row-arrow-left"
+            onclick="scrollRank(-600)"
+        >
+            ‹
+        </button>
+
         <!-- TUẦN -->
-<div class="rank-row" id="weekRank">
 
-    <% topWeek.forEach((manga, i) => { %>
+        <div class="rank-row" id="weekRank">
 
-    <a href="/manga/<%= manga.slug %>" class="rank-card">
+            <% topWeek.forEach((manga, i) => { %>
 
-        <img
-            src="<%= manga.cover || '/images/no-cover.png' %>"
-            alt="<%= manga.title %>"
-        >
+            <a href="/manga/<%= manga.slug %>" class="rank-card">
 
-        <div class="rank-body">
+                <img
+                    src="<%= manga.cover || '/images/no-cover.png' %>"
+                    alt="<%= manga.title %>"
+                >
 
-            <h4><%= manga.title %></h4>
+                <div class="rank-body">
 
-            <p>
-                CHƯƠNG <%= manga.lastChapter || 0 %> -
-                <%= timeAgo(manga.lastChapterDate) %>
-            </p>
+                    <h4><%= manga.title %></h4>
 
-            <small>
-                <%= (manga.weeklyViews || 0).toLocaleString("vi-VN") %>
-                LƯỢT XEM
-            </small>
+                    <p>
+                        CHƯƠNG <%= manga.lastChapter || 0 %> -
+                        <%= timeAgo(manga.lastChapterDate) %>
+                    </p>
 
-        </div>
+                    <small>
+                        <%= (manga.weeklyViews || 0).toLocaleString("vi-VN") %>
+                        LƯỢT XEM
+                    </small>
 
-        <span class="rank-number">
-            <%= String(i + 1).padStart(2,"0") %>
-        </span>
+                </div>
 
-    </a>
+                <span class="rank-number">
+                    <%= String(i + 1).padStart(2,"0") %>
+                </span>
 
-    <% }) %>
+            </a>
 
-</div>
-
-<!-- THÁNG -->
-<div
-    class="rank-row"
-    id="monthRank"
-    style="display:none"
->
-
-    <% topMonth.forEach((manga, i) => { %>
-
-    <a href="/manga/<%= manga.slug %>" class="rank-card">
-
-        <img
-            src="<%= manga.cover || '/images/no-cover.png' %>"
-            alt="<%= manga.title %>"
-        >
-
-        <div class="rank-body">
-
-            <h4><%= manga.title %></h4>
-
-            <p>
-                CHƯƠNG <%= manga.lastChapter || 0 %> -
-                <%= timeAgo(manga.lastChapterDate) %>
-            </p>
-
-            <small>
-                <%= (manga.monthlyViews || 0).toLocaleString("vi-VN") %>
-                LƯỢT XEM
-            </small>
+            <% }) %>
 
         </div>
 
-        <span class="rank-number">
-            <%= String(i + 1).padStart(2,"0") %>
-        </span>
+        <!-- THÁNG -->
 
-    </a>
-
-    <% }) %>
-
-</div>
-
-<!-- MỌI LÚC -->
-<div
-    class="rank-row"
-    id="allRank"
-    style="display:none"
->
-
-    <% topAll.forEach((manga, i) => { %>
-
-    <a href="/manga/<%= manga.slug %>" class="rank-card">
-
-        <img
-            src="<%= manga.cover || '/images/no-cover.png' %>"
-            alt="<%= manga.title %>"
+        <div
+            class="rank-row"
+            id="monthRank"
+            style="display:none"
         >
 
-        <div class="rank-body">
+            <% topMonth.slice(0,24).forEach((manga, i) => { %>
 
-            <h4><%= manga.title %></h4>
+            <a href="/manga/<%= manga.slug %>" class="rank-card">
 
-            <p>
-                CHƯƠNG <%= manga.lastChapter || 0 %> -
-                <%= timeAgo(manga.lastChapterDate) %>
-            </p>
+                <img
+                    src="<%= manga.cover || '/images/no-cover.png' %>"
+                    alt="<%= manga.title %>"
+                >
 
-            <small>
-                <%= (manga.views || 0).toLocaleString("vi-VN") %>
-                LƯỢT XEM
-            </small>
+                <div class="rank-body">
+
+                    <h4><%= manga.title %></h4>
+
+                    <p>
+                        CHƯƠNG <%= manga.lastChapter || 0 %> -
+                        <%= timeAgo(manga.lastChapterDate) %>
+                    </p>
+
+                    <small>
+                        <%= (manga.monthlyViews || 0).toLocaleString("vi-VN") %>
+                        LƯỢT XEM
+                    </small>
+
+                </div>
+
+                <span class="rank-number">
+                    <%= String(i + 1).padStart(2,"0") %>
+                </span>
+
+            </a>
+
+            <% }) %>
 
         </div>
 
-        <span class="rank-number">
-            <%= String(i + 1).padStart(2,"0") %>
-        </span>
+        <!-- MỌI LÚC -->
 
-    </a>
+        <div
+            class="rank-row"
+            id="allRank"
+            style="display:none"
+        >
 
-    <% }) %>
+            <% topAll.slice(0,24).forEach((manga, i) => { %>
 
-</div>
+            <a href="/manga/<%= manga.slug %>" class="rank-card">
+
+                <img
+                    src="<%= manga.cover || '/images/no-cover.png' %>"
+                    alt="<%= manga.title %>"
+                >
+
+                <div class="rank-body">
+
+                    <h4><%= manga.title %></h4>
+
+                    <p>
+                        CHƯƠNG <%= manga.lastChapter || 0 %> -
+                        <%= timeAgo(manga.lastChapterDate) %>
+                    </p>
+
+                    <small>
+                        <%= (manga.views || 0).toLocaleString("vi-VN") %>
+                        LƯỢT XEM
+                    </small>
+
+                </div>
+
+                <span class="rank-number">
+                    <%= String(i + 1).padStart(2,"0") %>
+                </span>
+
+            </a>
+
+            <% }) %>
+
+        </div>
+
+        <!-- Nút phải -->
+
+        <button
+            type="button"
+            class="row-arrow row-arrow-right"
+            onclick="scrollRank(600)"
+        >
+            ›
+        </button>
+
+    </div>
 
 </section>
 
 <!-- =========================
-        THỂ LOẠI (dùng lại cho ROMCOM / BÍ ẨN & TRINH THÁM / ĐỜI THƯỜNG ...)
-        -> Khi controller truyền thêm biến (ví dụ genreSections = [{title:'ROMCOM', mangas:[...]}, ...])
-        thì chỉ cần forEach section này ra nhiều lần, đổi id row cho không trùng.
+        ĐỀ XUẤT CHO BẠN
 ========================= -->
 
 <section class="section">
@@ -296,9 +333,19 @@ function timeAgo(date){
 
     <div class="row-wrapper">
 
+        <!-- Nút trái -->
+
+        <button
+            type="button"
+            class="row-arrow row-arrow-left"
+            onclick="document.getElementById('rowSuggest').scrollBy({left:-600,behavior:'smooth'})"
+        >
+            ‹
+        </button>
+
         <div class="home-row" id="rowSuggest">
 
-            <% mangas.slice().reverse().forEach(manga => { %>
+            <% mangas.slice().reverse().slice(0,24).forEach(manga => { %>
 
             <a href="/manga/<%= manga.slug %>" class="home-card">
 
@@ -312,7 +359,8 @@ function timeAgo(date){
                     <h3><%= manga.title %></h3>
 
                     <p>
-                        C. <%= manga.lastChapter || 0 %> - <%= timeAgo(manga.lastChapterDate) %>
+                        C. <%= manga.lastChapter || 0 %> -
+                        <%= timeAgo(manga.lastChapterDate) %>
                     </p>
 
                 </div>
@@ -323,9 +371,11 @@ function timeAgo(date){
 
         </div>
 
+        <!-- Nút phải -->
+
         <button
             type="button"
-            class="row-arrow"
+            class="row-arrow row-arrow-right"
             onclick="document.getElementById('rowSuggest').scrollBy({left:600,behavior:'smooth'})"
         >
             ›
@@ -334,10 +384,195 @@ function timeAgo(date){
     </div>
 
     <div class="section-footer">
-        <a href="/manga">› Xem danh sách truyện</a>
+        <a href="/manga">› Đề xuất cho bạn</a>
     </div>
 
 </section>
+
+<!-- =========================
+        BOX TRUYỆN ROMCOM (2 hàng cuộn ngang)
+========================= -->
+
+<%
+const romcomMangas = mangas.filter(manga => {
+    if (!manga.genres) return false;
+
+    const genresLower = manga.genres.map(g => g.toLowerCase());
+
+    return genresLower.includes("romance")
+        && genresLower.includes("comedy");
+});
+%>
+
+<% if (romcomMangas.length > 0) { %>
+
+<section class="section">
+
+    <div class="section-title">
+        <h2>ROMCOM</h2>
+    </div>
+
+    <div class="row-wrapper">
+
+        <!-- Nút trái -->
+
+        <button
+            type="button"
+            class="row-arrow row-arrow-left"
+            onclick="document.getElementById('rowRomcom').scrollBy({left:-600,behavior:'smooth'})"
+        >
+            ‹
+        </button>
+
+        <!-- Danh sách truyện -->
+
+        <div
+            class="home-row home-row-new"
+            id="rowRomcom"
+        >
+
+            <% romcomMangas.slice(0,24).forEach(manga => { %>
+
+            <a
+                href="/manga/<%= manga.slug %>"
+                class="home-card"
+            >
+
+                <img
+                    src="<%= manga.cover || '/images/no-cover.png' %>"
+                    alt="<%= manga.title %>"
+                >
+
+                <div class="home-card-body">
+
+                    <h3><%= manga.title %></h3>
+
+                    <p>
+                        C. <%= manga.lastChapter || 0 %> -
+                        <%= timeAgo(manga.lastChapterDate) %>
+                    </p>
+
+                </div>
+
+            </a>
+
+            <% }) %>
+
+        </div>
+
+        <!-- Nút phải -->
+
+        <button
+            type="button"
+            class="row-arrow row-arrow-right"
+            onclick="document.getElementById('rowRomcom').scrollBy({left:600,behavior:'smooth'})"
+        >
+            ›
+        </button>
+
+    </div>
+
+    <div class="section-footer">
+        <a href="/manga?genre=romance,comedy">› Xem danh sách romcom</a>
+    </div>
+
+</section>
+
+<% } %>
+
+
+<!-- =========================
+        BOX TRUYỆN ĐỜI THƯỜNG (2 hàng cuộn ngang)
+========================= -->
+
+<%
+const sliceOfLifeMangas = mangas.filter(manga => {
+
+    if (!manga.genres) return false;
+
+    const genresLower = manga.genres.map(g => g.toLowerCase());
+
+    return genresLower.includes("slice of life")
+        || genresLower.includes("đời thường");
+
+});
+%>
+
+<% if (sliceOfLifeMangas.length > 0) { %>
+
+<section class="section">
+
+    <div class="section-title">
+        <h2>ĐỜI THƯỜNG</h2>
+    </div>
+
+    <div class="row-wrapper">
+
+        <!-- Nút trái -->
+
+        <button
+            type="button"
+            class="row-arrow row-arrow-left"
+            onclick="document.getElementById('rowSliceOfLife').scrollBy({left:-600,behavior:'smooth'})"
+        >
+            ‹
+        </button>
+
+        <!-- Danh sách truyện -->
+
+        <div
+            class="home-row home-row-new"
+            id="rowSliceOfLife"
+        >
+
+            <% sliceOfLifeMangas.slice(0,24).forEach(manga => { %>
+
+            <a
+                href="/manga/<%= manga.slug %>"
+                class="home-card"
+            >
+
+                <img
+                    src="<%= manga.cover || '/images/no-cover.png' %>"
+                    alt="<%= manga.title %>"
+                >
+
+                <div class="home-card-body">
+
+                    <h3><%= manga.title %></h3>
+
+                    <p>
+                        C. <%= manga.lastChapter || 0 %> -
+                        <%= timeAgo(manga.lastChapterDate) %>
+                    </p>
+
+                </div>
+
+            </a>
+
+            <% }) %>
+
+        </div>
+
+        <!-- Nút phải -->
+
+        <button
+            type="button"
+            class="row-arrow row-arrow-right"
+            onclick="document.getElementById('rowSliceOfLife').scrollBy({left:600,behavior:'smooth'})"
+        >
+            ›
+        </button>
+
+    </div>
+
+    <div class="section-footer">
+        <a href="/manga?genre=slice-of-life">› Xem danh sách đời thường</a>
+    </div>
+
+</section>
+
+<% } %>
 
 <script>
 
@@ -439,5 +674,24 @@ document.querySelectorAll(".rank-tab").forEach(tab => {
     });
 
 });
+
+function scrollRank(amount){
+
+    let activeRow = document.getElementById("weekRank");
+
+    if(document.getElementById("monthRank").style.display !== "none"){
+        activeRow = document.getElementById("monthRank");
+    }
+
+    if(document.getElementById("allRank").style.display !== "none"){
+        activeRow = document.getElementById("allRank");
+    }
+
+    activeRow.scrollBy({
+        left: amount,
+        behavior: "smooth"
+    });
+
+}
 
 </script>

@@ -2,11 +2,11 @@
 
     <h1 class="page-title">Danh sách truyện</h1>
 
-    <div class="manga-grid">
+    <div class="list-grid">
 
         <% mangas.forEach(manga => { %>
 
-            <a href="/manga/<%= manga.slug %>" class="manga-card">
+            <a href="/manga/<%= manga.slug %>" class="list-card">
 
                 <img
                     src="<%= manga.cover || '/images/no-cover.png' %>"

@@ -21,7 +21,7 @@ const chapterSchema = new mongoose.Schema(
     // =========================
 
     chapterNumber: {
-      type: Number,
+      type: String,
 
       required: true,
     },

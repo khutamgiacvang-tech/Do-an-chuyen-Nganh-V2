@@ -22,14 +22,25 @@
 
         </nav>
 
-        <!-- Search -->
         <div class="search-box">
 
             <i class="fa-solid fa-magnifying-glass"></i>
 
             <input
                 type="text"
-                placeholder="Tìm kiếm truyện...">
+                id="searchInput"
+                placeholder="Tìm kiếm truyện..."
+                autocomplete="off"
+            >
+
+            <button type="button" id="searchClear" class="search-clear" style="display:none;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div
+                id="searchDropdown"
+                class="search-dropdown"
+            ></div>
 
         </div>
 
@@ -154,11 +165,11 @@
 
                     <% if(user && user.role === "translator"){ %>
 
-<a href="/my-manga" class="dropdown-item">
-    📚 Truyện của tôi
-</a>
+                    <a href="/my-manga" class="dropdown-item">
+                        📚 Truyện của tôi
+                    </a>
 
-<% } %>
+                    <% } %>
 
                     <a href="/translator/application">
 
@@ -215,5 +226,91 @@
         </div>
 
     </div>
+
+    <script>
+    (function(){
+        const input = document.getElementById('searchInput');
+        const dropdown = document.getElementById('searchDropdown');
+        const clearBtn = document.getElementById('searchClear');
+
+        let debounceTimer;
+
+        input.addEventListener('input', function(){
+            const keyword = input.value.trim();
+
+            clearBtn.style.display = input.value ? 'flex' : 'none';
+
+            clearTimeout(debounceTimer);
+
+            if(!keyword){
+                dropdown.classList.remove('active');
+                dropdown.innerHTML = '';
+                return;
+            }
+
+            // Hiện skeleton loading ngay lập tức
+            renderSkeleton();
+            dropdown.classList.add('active');
+
+            debounceTimer = setTimeout(() => {
+                fetch('/api/search?q=' + encodeURIComponent(keyword))
+                    .then(res => res.json())
+                    .then(data => renderResults(data))
+                    .catch(err => console.error('Search error:', err));
+            }, 300); // debounce 300ms
+        });
+
+        clearBtn.addEventListener('click', function(){
+            input.value = '';
+            clearBtn.style.display = 'none';
+            dropdown.classList.remove('active');
+            dropdown.innerHTML = '';
+            input.focus();
+        });
+
+        function renderSkeleton(){
+            let html = '';
+
+            for(let i = 0; i < 3; i++){
+                html += `
+                    <div class="search-skeleton-item">
+                        <div class="skeleton-line title"></div>
+                        <div class="skeleton-line thumb"></div>
+                    </div>
+                `;
+            }
+
+            dropdown.innerHTML = html;
+        }
+
+        function renderResults(mangas){
+            dropdown.innerHTML = '';
+
+            if(!mangas.length){
+                dropdown.innerHTML = '<div class="search-empty">Không tìm thấy kết quả</div>';
+            } else {
+                mangas.forEach(manga => {
+                    const item = document.createElement('a');
+                    item.href = '/manga/' + manga.slug;
+                    item.className = 'search-item';
+                    item.innerHTML = `
+                        <img src="${manga.cover}" alt="${manga.title}">
+                        <span>${manga.title}</span>
+                    `;
+                    dropdown.appendChild(item);
+                });
+            }
+
+            dropdown.classList.add('active');
+        }
+
+        // Ẩn dropdown khi click ra ngoài
+        document.addEventListener('click', function(e){
+            if(!e.target.closest('.search-box')){
+                dropdown.classList.remove('active');
+            }
+        });
+    })();
+    </script>
 
 </header>

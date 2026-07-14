@@ -305,7 +305,7 @@ router.get(
 router.get("/manga", async (req, res) => {
 
     const page = parseInt(req.query.page) || 1;
-    const limit = 20;
+    const limit = 25;
 
     const totalMangas = await Manga.countDocuments();
 
@@ -327,5 +327,19 @@ router.get("/manga", async (req, res) => {
 
 });
 
+router.get(
+    "/api/search",
+    mangaController.searchAjax
+);
+
+router.post(
+    "/history/save",
+    mangaController.saveHistory
+);
+
+router.get(
+    "/history",
+    mangaController.history
+);
 
 module.exports = router;

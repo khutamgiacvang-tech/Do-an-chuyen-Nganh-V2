@@ -126,6 +126,7 @@ app.use("/", require("./routes/translator"));
 app.use("/", require("./routes/admin"));
 app.use("/",require("./routes/manga"));
 app.use("/", require("./routes/notification"));
+app.use("/api", require("./routes/push"));
 
 // =====================
 // SERVER
@@ -134,4 +135,34 @@ const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
     console.log(`🚀 Server chạy tại http://localhost:${PORT}`);
+});
+
+// =====================
+// TEST PUSH ROUTE
+// =====================
+app.post("/api/test-push", async (req, res) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ message: "Chưa đăng nhập!" });
+        }
+
+        // Tìm subscription đã lưu của user (giả sử model User hoặc PushSubscription của bạn có lưu trữ)
+        const subscription = req.user.pushSubscription; 
+        
+        if (!subscription || !subscription.endpoint) {
+            return res.status(400).json({ message: "Không tìm thấy thông tin đăng ký nhận thông báo (subscription) của tài khoản này!" });
+        }
+
+        const webpush = require("web-push");
+        const payload = JSON.stringify({
+            title: "MangaNest Test",
+            body: "Thông báo đẩy từ server hoạt động thành công rồi nhé! 🎉"
+        });
+
+        await webpush.sendNotification(subscription, payload);
+        res.status(200).json({ message: "Gửi thông báo thành công!" });
+    } catch (error) {
+        console.error("Lỗi khi gửi push notification:", error);
+        res.status(500).json({ message: "Lỗi server khi gửi thông báo: " + error.message });
+    }
 });

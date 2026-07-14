@@ -1,0 +1,56 @@
+.library-page{
+
+    max-width:1200px;
+    margin:auto;
+    padding:30px;
+
+}
+
+.library-page h1{
+
+    margin-bottom:25px;
+
+}
+
+.empty-box{
+
+    background:#232631;
+    padding:20px;
+    border-radius:10px;
+    text-align:center;
+
+}
+
+.library-grid{
+
+    display:grid;
+    grid-template-columns:
+    repeat(auto-fill,minmax(180px,1fr));
+
+    gap:20px;
+
+}
+
+.library-card{
+
+    background:#232631;
+    border-radius:12px;
+    overflow:hidden;
+    text-decoration:none;
+    color:#fff;
+
+}
+
+.library-card img{
+
+    width:100%;
+    height:260px;
+    object-fit:cover;
+
+}
+
+.library-info{
+
+    padding:12px;
+
+}
